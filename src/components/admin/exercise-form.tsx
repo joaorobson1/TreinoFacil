@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { type ChangeEvent, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Plus, Trash2, X } from "lucide-react";
+import { Loader2, Plus, Trash2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ import {
   deleteExerciseAction,
   updateExerciseAction,
 } from "@/actions/admin/exercise.actions";
+import { uploadExerciseMediaAction } from "@/actions/admin/media.actions";
 
 type Lookup = { id: number; name: string };
 
@@ -47,6 +48,8 @@ export function ExerciseForm({
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const [f, setF] = useState<ExerciseInput>({
     name: initial?.name ?? "",
@@ -70,6 +73,20 @@ export function ExerciseForm({
       ...prev,
       [k]: prev[k].includes(id) ? prev[k].filter((x) => x !== id) : [...prev[k], id],
     }));
+
+  async function handleFile(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setUploading(true);
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await uploadExerciseMediaAction(fd);
+    setUploading(false);
+    if (!res.ok) return toast.error(res.error);
+    set("media", [...f.media, { type: res.value.type, url: res.value.url }]);
+    toast.success("Mídia enviada.");
+  }
 
   async function submit() {
     if (f.name.trim().length < 2) return toast.error("Informe o nome.");
@@ -179,7 +196,7 @@ export function ExerciseForm({
       })}
 
       <div className="space-y-2">
-        <Label>Mídia (imagem / GIF / vídeo por URL)</Label>
+        <Label>Mídia (envie um arquivo ou cole uma URL / link do YouTube)</Label>
         <div className="space-y-2">
           {f.media.map((m, i) => (
             <div key={i} className="flex gap-2">
@@ -194,10 +211,34 @@ export function ExerciseForm({
               </Button>
             </div>
           ))}
-          <Button type="button" variant="outline" className="h-10 rounded-xl" onClick={() => set("media", [...f.media, { type: "image", url: "" }])}>
-            <Plus className="size-4" />
-            Adicionar mídia
-          </Button>
+          <div className="flex gap-2">
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*,video/mp4,video/webm"
+              className="hidden"
+              onChange={handleFile}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              className="h-10 flex-1 rounded-xl"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+            >
+              {uploading ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
+              Enviar arquivo
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="h-10 flex-1 rounded-xl"
+              onClick={() => set("media", [...f.media, { type: "image", url: "" }])}
+            >
+              <Plus className="size-4" />
+              Adicionar URL
+            </Button>
+          </div>
         </div>
       </div>
 
