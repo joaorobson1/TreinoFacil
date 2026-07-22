@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ChevronRight, Dumbbell, Clock, Sparkles } from "lucide-react";
+import { Clock, Dumbbell, Sparkles } from "lucide-react";
 import { createClient } from "@/infrastructure/supabase/server";
 import { GenerateWorkoutButton } from "@/components/workout/generate-workout-button";
+import {
+  type EditorDay,
+  FichaEditor,
+} from "@/components/workout/ficha-editor";
 import { ROUTES } from "@/lib/routes";
 
 export const metadata: Metadata = { title: "Treino" };
@@ -18,7 +21,7 @@ export default async function WorkoutPage() {
   const { data: uw } = await supabase
     .from("user_workouts")
     .select(
-      "id, workout_templates(name, split_type, days_per_week, session_duration_minutes, workout_days(id, day_index, name, focus, workout_exercises(id)))",
+      "id, workout_templates(name, days_per_week, session_duration_minutes, workout_days(id, day_index, name, focus, workout_exercises(id, position, sets, reps, exercise_id, exercises(name))))",
     )
     .eq("user_id", user.id)
     .eq("is_active", true)
@@ -48,35 +51,71 @@ export default async function WorkoutPage() {
 
   const template = uw.workout_templates;
 
-  // conta exercícios por dia descontando os removidos pelo Generator
-  const { data: overrides } = await supabase
-    .from("user_workout_overrides")
-    .select("workout_exercise_id, substitute_exercise_id")
-    .eq("user_workout_id", uw.id);
-  const removed = new Set(
-    (overrides ?? [])
-      .filter((o) => !o.substitute_exercise_id)
-      .map((o) => o.workout_exercise_id),
-  );
-  const personalized = (overrides ?? []).length > 0;
+  const [{ data: overrides }, { data: additions }, { data: catalog }] =
+    await Promise.all([
+      supabase
+        .from("user_workout_overrides")
+        .select("workout_exercise_id, substitute_exercise_id")
+        .eq("user_workout_id", uw.id),
+      supabase
+        .from("user_workout_additions")
+        .select("id, workout_day_id, exercise_id, sets, reps, exercises(name)")
+        .eq("user_workout_id", uw.id)
+        .order("created_at"),
+      supabase.from("exercises").select("id, name").eq("is_active", true).order("name"),
+    ]);
 
-  const days = [...template.workout_days].sort(
-    (a, b) => a.day_index - b.day_index,
+  const overrideMap = new Map(
+    (overrides ?? []).map((o) => [o.workout_exercise_id, o.substitute_exercise_id]),
   );
+  const catalogMap = new Map((catalog ?? []).map((c) => [c.id, c.name]));
+  const personalized = (overrides ?? []).length > 0 || (additions ?? []).length > 0;
+
+  const additionsByDay = new Map<string, typeof additions>();
+  for (const a of additions ?? []) {
+    additionsByDay.set(a.workout_day_id, [...(additionsByDay.get(a.workout_day_id) ?? []), a]);
+  }
+
+  const days: EditorDay[] = [...template.workout_days]
+    .sort((a, b) => a.day_index - b.day_index)
+    .map((day) => {
+      const templateExercises = [...day.workout_exercises]
+        .sort((a, b) => a.position - b.position)
+        .flatMap((we) => {
+          const hasOverride = overrideMap.has(we.id);
+          const substitute = overrideMap.get(we.id);
+          if (hasOverride && substitute == null) return [];
+          const name = substitute
+            ? (catalogMap.get(substitute) ?? "—")
+            : (we.exercises?.name ?? "—");
+          return [{ key: `we-${we.id}`, name, sets: we.sets, reps: we.reps, additionId: null }];
+        });
+      const extra = (additionsByDay.get(day.id) ?? []).map((a) => ({
+        key: `add-${a.id}`,
+        name: a.exercises?.name ?? "—",
+        sets: a.sets,
+        reps: a.reps,
+        additionId: a.id,
+      }));
+      return {
+        id: day.id,
+        letter: String.fromCharCode(64 + day.day_index),
+        name: day.name,
+        focus: day.focus,
+        exercises: [...templateExercises, ...extra],
+      };
+    });
 
   return (
     <div className="mx-auto w-full max-w-md px-6 pt-8">
       <h1 className="mb-4 text-2xl font-bold tracking-tight">Treino</h1>
 
-      {/* Resumo da ficha */}
       <div className="border-primary/20 relative mb-6 overflow-hidden rounded-3xl border p-6">
         <div
           aria-hidden
           className="bg-primary/20 pointer-events-none absolute -top-16 -right-10 size-56 rounded-full blur-[90px]"
         />
-        <p className="text-muted-foreground relative text-sm font-medium">
-          Sua ficha
-        </p>
+        <p className="text-muted-foreground relative text-sm font-medium">Sua ficha</p>
         <h2 className="relative mt-1 text-2xl font-bold tracking-tight text-balance">
           {template.name}
         </h2>
@@ -93,43 +132,12 @@ export default async function WorkoutPage() {
         {personalized && (
           <div className="text-primary relative mt-4 inline-flex items-center gap-1.5 text-xs font-medium">
             <Sparkles className="size-3.5" />
-            Personalizada para seus equipamentos e limitações
+            Personalizada para você
           </div>
         )}
       </div>
 
-      {/* Dias */}
-      <div className="space-y-3">
-        {days.map((day) => {
-          const count = day.workout_exercises.filter(
-            (we) => !removed.has(we.id),
-          ).length;
-          const letter = String.fromCharCode(64 + day.day_index);
-          return (
-            <Link
-              key={day.id}
-              href={`${ROUTES.session}/${day.id}`}
-              className="bg-card hover:border-foreground/20 flex items-center gap-4 rounded-2xl border p-4 transition-colors"
-            >
-              <div className="bg-primary/10 text-primary flex size-11 shrink-0 items-center justify-center rounded-xl text-lg font-bold">
-                {letter}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-semibold">{day.name}</p>
-                {day.focus && (
-                  <p className="text-muted-foreground truncate text-sm">
-                    {day.focus}
-                  </p>
-                )}
-              </div>
-              <span className="text-muted-foreground shrink-0 text-sm">
-                {count} exerc.
-              </span>
-              <ChevronRight className="text-muted-foreground size-5 shrink-0" />
-            </Link>
-          );
-        })}
-      </div>
+      <FichaEditor days={days} catalog={catalog ?? []} />
 
       <div className="mt-6 flex justify-center">
         <GenerateWorkoutButton

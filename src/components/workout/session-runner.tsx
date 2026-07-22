@@ -155,7 +155,7 @@ export function SessionRunner({
         <div className="space-y-2">
           {exercises.map((e, i) => (
             <div
-              key={e.workoutExerciseId}
+              key={e.id}
               className="bg-card flex items-center gap-3 rounded-2xl border p-3"
             >
               <div className="bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-xl text-sm font-semibold tabular-nums">

@@ -1151,6 +1151,71 @@ export type Database = {
           },
         ]
       }
+      user_workout_additions: {
+        Row: {
+          created_at: string
+          exercise_id: string
+          id: string
+          reps: string
+          rest_seconds: number
+          sets: number
+          user_id: string
+          user_workout_id: string
+          workout_day_id: string
+        }
+        Insert: {
+          created_at?: string
+          exercise_id: string
+          id?: string
+          reps?: string
+          rest_seconds?: number
+          sets?: number
+          user_id: string
+          user_workout_id: string
+          workout_day_id: string
+        }
+        Update: {
+          created_at?: string
+          exercise_id?: string
+          id?: string
+          reps?: string
+          rest_seconds?: number
+          sets?: number
+          user_id?: string
+          user_workout_id?: string
+          workout_day_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_workout_additions_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_workout_additions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_workout_additions_user_workout_id_fkey"
+            columns: ["user_workout_id"]
+            isOneToOne: false
+            referencedRelation: "user_workouts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_workout_additions_workout_day_id_fkey"
+            columns: ["workout_day_id"]
+            isOneToOne: false
+            referencedRelation: "workout_days"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_workout_overrides: {
         Row: {
           created_at: string

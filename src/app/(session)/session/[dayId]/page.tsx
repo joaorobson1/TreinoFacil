@@ -44,8 +44,23 @@ export default async function SessionPage({
     (overrides ?? []).map((o) => [o.workout_exercise_id, o.substitute_exercise_id]),
   );
 
-  // lista efetiva (aplica overrides; remove quando substitute = null)
-  const effective = [...day.workout_exercises]
+  // exercícios extras adicionados pelo usuário a este dia
+  const { data: additions } = await supabase
+    .from("user_workout_additions")
+    .select("id, exercise_id, sets, reps, rest_seconds")
+    .eq("user_workout_id", uw.id)
+    .eq("workout_day_id", dayId)
+    .order("created_at");
+
+  // lista efetiva: template (com overrides) + adicionados
+  const effective: {
+    key: string;
+    workoutExerciseId: string | null;
+    exerciseId: string;
+    targetSets: number;
+    targetReps: string;
+    restSeconds: number;
+  }[] = [...day.workout_exercises]
     .sort((a, b) => a.position - b.position)
     .flatMap((we) => {
       const hasOverride = overrideMap.has(we.id);
@@ -53,6 +68,7 @@ export default async function SessionPage({
       if (hasOverride && substitute == null) return []; // removido
       return [
         {
+          key: `we-${we.id}`,
           workoutExerciseId: we.id,
           exerciseId: substitute ?? we.exercise_id,
           targetSets: we.sets,
@@ -61,6 +77,17 @@ export default async function SessionPage({
         },
       ];
     });
+
+  for (const a of additions ?? []) {
+    effective.push({
+      key: `add-${a.id}`,
+      workoutExerciseId: null,
+      exerciseId: a.exercise_id,
+      targetSets: a.sets,
+      targetReps: a.reps,
+      restSeconds: a.rest_seconds,
+    });
+  }
 
   if (effective.length === 0) redirect(ROUTES.workout);
 
@@ -88,6 +115,7 @@ export default async function SessionPage({
 
     return [
       {
+        id: e.key,
         workoutExerciseId: e.workoutExerciseId,
         exerciseId: e.exerciseId,
         name: d.name,

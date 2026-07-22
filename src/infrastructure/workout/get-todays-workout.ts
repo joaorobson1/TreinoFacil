@@ -50,11 +50,19 @@ export async function getTodaysWorkout(supabase: DB, userId: string): Promise<To
       .map((o) => o.workout_exercise_id),
   );
 
+  const { count: additions } = await supabase
+    .from("user_workout_additions")
+    .select("*", { count: "exact", head: true })
+    .eq("user_workout_id", uw.id)
+    .eq("workout_day_id", day.id);
+
+  const templateCount = day.workout_exercises.filter((we) => !removed.has(we.id)).length;
+
   return {
     dayId: day.id,
     dayName: day.name,
     focus: day.focus,
-    exerciseCount: day.workout_exercises.filter((we) => !removed.has(we.id)).length,
+    exerciseCount: templateCount + (additions ?? 0),
     durationMin: template.session_duration_minutes,
   };
 }

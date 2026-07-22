@@ -3,7 +3,8 @@ import type { Media } from "./exercise-media";
 export type LoggedSet = { weight: string; reps: string; done: boolean };
 
 export type SessionExercise = {
-  workoutExerciseId: string;
+  id: string;
+  workoutExerciseId: string | null;
   exerciseId: string;
   name: string;
   description: string | null;
