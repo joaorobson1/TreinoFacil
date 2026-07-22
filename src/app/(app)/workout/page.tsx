@@ -62,13 +62,22 @@ export default async function WorkoutPage() {
         .select("id, workout_day_id, exercise_id, sets, reps, exercises(name)")
         .eq("user_workout_id", uw.id)
         .order("created_at"),
-      supabase.from("exercises").select("id, name").eq("is_active", true).order("name"),
+      supabase
+        .from("exercises")
+        .select("id, name, muscle_groups(name)")
+        .eq("is_active", true)
+        .order("name"),
     ]);
 
   const overrideMap = new Map(
     (overrides ?? []).map((o) => [o.workout_exercise_id, o.substitute_exercise_id]),
   );
   const catalogMap = new Map((catalog ?? []).map((c) => [c.id, c.name]));
+  const pickerCatalog = (catalog ?? []).map((c) => ({
+    id: c.id,
+    name: c.name,
+    muscle: c.muscle_groups?.name ?? "Outros",
+  }));
   const personalized = (overrides ?? []).length > 0 || (additions ?? []).length > 0;
 
   const additionsByDay = new Map<string, typeof additions>();
@@ -137,7 +146,7 @@ export default async function WorkoutPage() {
         )}
       </div>
 
-      <FichaEditor days={days} catalog={catalog ?? []} />
+      <FichaEditor days={days} catalog={pickerCatalog} />
 
       <div className="mt-6 flex justify-center">
         <GenerateWorkoutButton

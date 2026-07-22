@@ -13,6 +13,7 @@ import {
   addWorkoutExerciseAction,
   removeWorkoutExerciseAction,
 } from "@/actions/ficha.actions";
+import { type PickerExercise, ExercisePicker } from "./exercise-picker";
 
 export type EditorExercise = {
   key: string;
@@ -29,15 +30,12 @@ export type EditorDay = {
   exercises: EditorExercise[];
 };
 
-const selectCls =
-  "border-input bg-background h-10 min-w-0 flex-1 rounded-lg border px-2 text-sm outline-none focus-visible:border-ring";
-
 function DayCard({
   day,
   catalog,
 }: {
   day: EditorDay;
-  catalog: { id: string; name: string }[];
+  catalog: PickerExercise[];
 }) {
   const router = useRouter();
   const [expanded, setExpanded] = useState(false);
@@ -143,16 +141,7 @@ function DayCard({
 
           {open ? (
             <div className="bg-muted/40 mt-3 space-y-2 rounded-xl p-2.5">
-              <select
-                value={exId}
-                onChange={(e) => setExId(e.target.value)}
-                className={`${selectCls} w-full`}
-              >
-                <option value="">Escolha um exercício...</option>
-                {catalog.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
+              <ExercisePicker catalog={catalog} value={exId} onChange={setExId} />
               <div className="flex items-center gap-1.5">
                 <Input value={sets} onChange={(e) => setSets(e.target.value)} className="h-10 w-14 rounded-lg px-1 text-center" aria-label="séries" />
                 <span className="text-muted-foreground text-xs">×</span>
@@ -192,7 +181,7 @@ export function FichaEditor({
   catalog,
 }: {
   days: EditorDay[];
-  catalog: { id: string; name: string }[];
+  catalog: PickerExercise[];
 }) {
   return (
     <div className="space-y-3">
