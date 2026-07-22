@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Dumbbell } from "lucide-react";
@@ -25,7 +26,7 @@ const item = {
 
 export default function LandingPage() {
   return (
-    <div className="relative flex min-h-dvh flex-col overflow-hidden">
+    <div className="relative flex min-h-dvh flex-col overflow-x-hidden">
       {/* Glow do accent ao fundo */}
       <div
         aria-hidden
@@ -43,6 +44,19 @@ export default function LandingPage() {
         animate="show"
         className="relative z-10 mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 pb-10"
       >
+        <motion.div variants={item} className="mb-8 flex justify-center">
+          <div className="ring-primary/10 rounded-[2rem] bg-white p-4 shadow-xl shadow-black/10 ring-1">
+            <Image
+              src="/logotreinofacil.png"
+              alt="TreinoFácil — Treine melhor. Evolua sempre."
+              width={512}
+              height={512}
+              priority
+              className="size-36 object-contain"
+            />
+          </div>
+        </motion.div>
+
         <motion.div
           variants={item}
           className="border-border/60 bg-muted/40 text-muted-foreground mb-8 inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium backdrop-blur"
