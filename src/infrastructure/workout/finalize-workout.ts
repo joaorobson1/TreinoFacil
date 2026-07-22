@@ -5,6 +5,7 @@ import {
   type AchievementContext,
   isAchievementUnlocked,
 } from "@/core/application/services/gamification/achievement-evaluator";
+import { evaluateProgramProgression } from "./program-progression";
 
 type DB = SupabaseClient<Database>;
 
@@ -39,7 +40,7 @@ const daysBetween = (a: string, b: string) =>
 export async function finalizeWorkout(
   supabase: DB,
   input: FinalizeInput,
-): Promise<{ unlocked: UnlockedAchievement[] }> {
+): Promise<{ unlocked: UnlockedAchievement[]; programAdvanced: boolean }> {
   const { userId, completedWorkoutId, completedAt, durationSeconds, totalVolume } = input;
 
   // séries/reps efetivamente registradas
@@ -164,5 +165,8 @@ export async function finalizeWorkout(
     await supabase.from("user_achievements").insert(toInsert);
   }
 
-  return { unlocked };
+  // ---------- progressão de programa ----------
+  const prog = await evaluateProgramProgression(supabase, userId, completedAt);
+
+  return { unlocked, programAdvanced: prog.advanced };
 }

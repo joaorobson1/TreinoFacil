@@ -8,6 +8,7 @@ const ITEMS = [
   { href: "/admin", label: "Dashboard", exact: true },
   { href: "/admin/exercises", label: "Exercícios" },
   { href: "/admin/templates", label: "Fichas" },
+  { href: "/admin/programs", label: "Programas" },
   { href: "/admin/achievements", label: "Conquistas" },
   { href: "/admin/catalog", label: "Catálogo" },
 ];

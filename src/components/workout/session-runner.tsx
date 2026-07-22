@@ -128,6 +128,9 @@ export function SessionRunner({
         duration: 6000,
       });
     }
+    if (result.value.programAdvanced) {
+      toast("🎉 Você avançou de fase no programa!", { duration: 6000 });
+    }
     router.push(ROUTES.dashboard);
     router.refresh();
   }

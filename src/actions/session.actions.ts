@@ -19,7 +19,12 @@ import {
 export async function completeWorkoutAction(
   input: CompleteWorkoutInput,
 ): Promise<
-  Result<{ totalVolume: number; totalSets: number; unlocked: UnlockedAchievement[] }>
+  Result<{
+    totalVolume: number;
+    totalSets: number;
+    unlocked: UnlockedAchievement[];
+    programAdvanced: boolean;
+  }>
 > {
   const parsed = completeWorkoutSchema.safeParse(input);
   if (!parsed.success) return err("Dados da sessão inválidos.");
@@ -74,8 +79,8 @@ export async function completeWorkoutAction(
     await supabase.from("user_progress").insert(progressRows);
   }
 
-  // pós-treino: agrega estatísticas, evolução por exercício e conquistas
-  const { unlocked } = await finalizeWorkout(supabase, {
+  // pós-treino: estatísticas, evolução por exercício, conquistas e progressão de programa
+  const { unlocked, programAdvanced } = await finalizeWorkout(supabase, {
     userId: user.id,
     completedWorkoutId: completed.id,
     completedAt: completed.completed_at,
@@ -89,5 +94,5 @@ export async function completeWorkoutAction(
   revalidatePath("/workout");
   revalidatePath("/achievements");
 
-  return ok({ totalVolume: Math.round(totalVolume), totalSets, unlocked });
+  return ok({ totalVolume: Math.round(totalVolume), totalSets, unlocked, programAdvanced });
 }

@@ -14,7 +14,6 @@ import type {
 type DB = SupabaseClient<Database>;
 
 const MIN_EXERCISES_PER_DAY = 3;
-/** Rejeita candidatos que exigiriam adaptar mais que esta fração dos exercícios. */
 const MAX_ADAPT_FRACTION = 0.5;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -34,18 +33,16 @@ function toExerciseInfo(ex: any): ExerciseInfo {
   };
 }
 
-/**
- * Avalia um candidato: substitui incompatíveis e decide viabilidade.
- * Retorna os overrides ou `null` se o candidato não for viável.
- */
+/** Substitui incompatíveis; retorna os overrides e se a ficha é viável para o usuário. */
 function evaluateCandidate(
   days: { exercises: { workoutExerciseId: string; exercise: ExerciseInfo }[] }[],
   pool: ExerciseInfo[],
   ctx: UserContext,
-): WorkoutOverride[] | null {
+): { overrides: WorkoutOverride[]; viable: boolean } {
   const overrides: WorkoutOverride[] = [];
   let totalExercises = 0;
   let adaptedExercises = 0;
+  let viable = true;
 
   for (const day of days) {
     const statuses = day.exercises.map((te) => ({
@@ -66,29 +63,19 @@ function evaluateCandidate(
       if (sub) {
         used.add(sub.id);
         remaining++;
-        overrides.push({
-          workoutExerciseId: te.workoutExerciseId,
-          substituteExerciseId: sub.id,
-          reason,
-        });
+        overrides.push({ workoutExerciseId: te.workoutExerciseId, substituteExerciseId: sub.id, reason });
       } else {
-        overrides.push({
-          workoutExerciseId: te.workoutExerciseId,
-          substituteExerciseId: null,
-          reason,
-        });
+        overrides.push({ workoutExerciseId: te.workoutExerciseId, substituteExerciseId: null, reason });
       }
     }
 
-    if (remaining < MIN_EXERCISES_PER_DAY) return null; // dia ficou fraco demais
+    if (remaining < MIN_EXERCISES_PER_DAY) viable = false;
   }
 
-  // ficha exige adaptar demais → não é uma boa opção para este usuário
   if (totalExercises > 0 && adaptedExercises / totalExercises > MAX_ADAPT_FRACTION) {
-    return null;
+    viable = false;
   }
-
-  return overrides;
+  return { overrides, viable };
 }
 
 async function loadTemplateDays(supabase: DB, templateId: string) {
@@ -103,27 +90,17 @@ async function loadTemplateDays(supabase: DB, templateId: string) {
   return (data ?? []).map((day) => ({
     exercises: (day.workout_exercises ?? [])
       .filter((we) => we.exercises)
-      .map((we) => ({
-        workoutExerciseId: we.id,
-        exercise: toExerciseInfo(we.exercises),
-      })),
+      .map((we) => ({ workoutExerciseId: we.id, exercise: toExerciseInfo(we.exercises) })),
   }));
 }
 
-/**
- * Atribui (ou reatribui) a ficha do usuário rodando o pipeline
- * Selector → Validator → Generator. Persiste user_workouts + overrides.
- */
-export async function assignWorkoutForUser(
-  supabase: DB,
-  userId: string,
-): Promise<Result<{ templateId: string; overrideCount: number }>> {
-  // 1) contexto
+// ---------------------------------------------------------------------------
+// Helpers reutilizáveis (também usados pela progressão de programas)
+// ---------------------------------------------------------------------------
+export async function loadUserContext(supabase: DB, userId: string): Promise<UserContext | null> {
   const { data: profile } = await supabase
     .from("profiles")
-    .select(
-      "goal_id, experience, available_days, available_time_minutes, training_location",
-    )
+    .select("goal_id, experience, available_days, available_time_minutes, training_location")
     .eq("user_id", userId)
     .single();
 
@@ -134,7 +111,7 @@ export async function assignWorkoutForUser(
     !profile.available_time_minutes ||
     !profile.training_location
   ) {
-    return err("Perfil incompleto para gerar a ficha.");
+    return null;
   }
 
   const [{ data: eqRows }, { data: limRows }] = await Promise.all([
@@ -142,7 +119,7 @@ export async function assignWorkoutForUser(
     supabase.from("user_limitations").select("limitation_id").eq("user_id", userId),
   ]);
 
-  const ctx: UserContext = {
+  return {
     goalId: profile.goal_id,
     level: mapExperienceToLevel(profile.experience),
     days: profile.available_days,
@@ -151,25 +128,141 @@ export async function assignWorkoutForUser(
     equipmentIds: new Set((eqRows ?? []).map((e) => e.equipment_id)),
     limitationIds: new Set((limRows ?? []).map((l) => l.limitation_id)),
   };
+}
 
-  // 2) candidatos (mesmo objetivo) + pool de exercícios
-  const [{ data: candRows }, { data: poolRows }] = await Promise.all([
-    supabase
-      .from("workout_templates")
-      .select(
-        "id, experience, days_per_week, session_duration_minutes, min_location, priority",
-      )
-      .eq("goal_id", ctx.goalId)
-      .eq("is_active", true),
-    supabase
-      .from("exercises")
-      .select(
-        "id, slug, name, primary_muscle_group_id, level, exercise_equipments(equipment_id, is_required), exercise_limitations(limitation_id, restriction)",
-      )
-      .eq("is_active", true),
-  ]);
+export async function loadExercisePool(supabase: DB): Promise<ExerciseInfo[]> {
+  const { data } = await supabase
+    .from("exercises")
+    .select(
+      "id, slug, name, primary_muscle_group_id, level, exercise_equipments(equipment_id, is_required), exercise_limitations(limitation_id, restriction)",
+    )
+    .eq("is_active", true);
+  return (data ?? []).map(toExerciseInfo);
+}
 
-  const pool = (poolRows ?? []).map(toExerciseInfo);
+export async function evaluateTemplate(
+  supabase: DB,
+  templateId: string,
+  pool: ExerciseInfo[],
+  ctx: UserContext,
+) {
+  const days = await loadTemplateDays(supabase, templateId);
+  return evaluateCandidate(days, pool, ctx);
+}
+
+/** Persiste a ficha ativa do usuário (1 por vez) + overrides. */
+export async function persistAssignment(
+  supabase: DB,
+  userId: string,
+  templateId: string,
+  overrides: WorkoutOverride[],
+  opts: { source: "algorithm" | "manual" | "admin"; programId?: string | null; phaseId?: string | null },
+): Promise<Result<{ templateId: string; overrideCount: number }>> {
+  await supabase
+    .from("user_workouts")
+    .update({ is_active: false })
+    .eq("user_id", userId)
+    .eq("is_active", true);
+
+  const { data: uw, error } = await supabase
+    .from("user_workouts")
+    .insert({
+      user_id: userId,
+      template_id: templateId,
+      source: opts.source,
+      is_active: true,
+      user_program_id: opts.programId ?? null,
+      program_phase_id: opts.phaseId ?? null,
+    })
+    .select("id")
+    .single();
+  if (error || !uw) return err("Falha ao salvar a ficha.");
+
+  if (overrides.length > 0) {
+    await supabase.from("user_workout_overrides").insert(
+      overrides.map((o) => ({
+        user_workout_id: uw.id,
+        workout_exercise_id: o.workoutExerciseId,
+        substitute_exercise_id: o.substituteExerciseId,
+        reason: o.reason,
+      })),
+    );
+  }
+  return ok({ templateId, overrideCount: overrides.length });
+}
+
+/** Tenta enrolar o usuário num programa compatível (objetivo + nível). */
+async function tryEnrollProgram(
+  supabase: DB,
+  userId: string,
+  ctx: UserContext,
+  pool: ExerciseInfo[],
+): Promise<Result<{ templateId: string; overrideCount: number }> | null> {
+  const { data: programs } = await supabase
+    .from("programs")
+    .select("id, experience, program_phases(id, phase_index, template_id)")
+    .eq("goal_id", ctx.goalId)
+    .eq("is_active", true);
+
+  const program = (programs ?? []).find(
+    (p) => p.experience === ctx.level && (p.program_phases ?? []).length > 0,
+  );
+  if (!program) return null;
+
+  const phase1 = [...program.program_phases].sort((a, b) => a.phase_index - b.phase_index)[0];
+  const { overrides, viable } = await evaluateTemplate(supabase, phase1.template_id, pool, ctx);
+  if (!viable) return null; // programa não encaixa nos equipamentos → cai no avulso
+
+  const { data: up } = await supabase
+    .from("user_programs")
+    .insert({
+      user_id: userId,
+      program_id: program.id,
+      current_phase_id: phase1.id,
+      status: "active",
+      is_active: true,
+    })
+    .select("id")
+    .single();
+
+  return persistAssignment(supabase, userId, phase1.template_id, overrides, {
+    source: "algorithm",
+    programId: up?.id ?? null,
+    phaseId: phase1.id,
+  });
+}
+
+/**
+ * Atribui (ou reatribui) a ficha do usuário. Prioriza PROGRAMA compatível
+ * (evolução automática); cai para ficha avulsa via Selector → Validator → Generator.
+ */
+export async function assignWorkoutForUser(
+  supabase: DB,
+  userId: string,
+): Promise<Result<{ templateId: string; overrideCount: number }>> {
+  const ctx = await loadUserContext(supabase, userId);
+  if (!ctx) return err("Perfil incompleto para gerar a ficha.");
+
+  const pool = await loadExercisePool(supabase);
+
+  // reatribuir zera o programa anterior
+  await supabase
+    .from("user_programs")
+    .update({ is_active: false, status: "paused" })
+    .eq("user_id", userId)
+    .eq("is_active", true);
+
+  // 1) programa compatível?
+  const enrolled = await tryEnrollProgram(supabase, userId, ctx, pool);
+  if (enrolled) return enrolled;
+
+  // 2) ficha avulsa
+  const { data: candRows } = await supabase
+    .from("workout_templates")
+    .select("id, experience, days_per_week, session_duration_minutes, min_location, priority")
+    .eq("goal_id", ctx.goalId)
+    .eq("is_active", true);
+
   const candidates = (candRows ?? []).map((c) => ({
     id: c.id,
     experience: c.experience,
@@ -182,49 +275,11 @@ export async function assignWorkoutForUser(
   const ranked = rankCandidates(candidates, ctx);
   if (ranked.length === 0) return err("Nenhuma ficha compatível encontrada.");
 
-  // 3) escolhe o melhor candidato viável e gera overrides
-  let chosenId: string | null = null;
-  let overrides: WorkoutOverride[] = [];
   for (const { template } of ranked) {
-    const days = await loadTemplateDays(supabase, template.id);
-    const result = evaluateCandidate(days, pool, ctx);
-    if (result !== null) {
-      chosenId = template.id;
-      overrides = result;
-      break;
+    const { overrides, viable } = await evaluateTemplate(supabase, template.id, pool, ctx);
+    if (viable) {
+      return persistAssignment(supabase, userId, template.id, overrides, { source: "algorithm" });
     }
   }
-  if (!chosenId) return err("Nenhuma ficha viável para o seu perfil.");
-
-  // 4) persiste (1 ficha ativa por usuário)
-  await supabase
-    .from("user_workouts")
-    .update({ is_active: false })
-    .eq("user_id", userId)
-    .eq("is_active", true);
-
-  const { data: uw, error: uwError } = await supabase
-    .from("user_workouts")
-    .insert({
-      user_id: userId,
-      template_id: chosenId,
-      source: "algorithm",
-      is_active: true,
-    })
-    .select("id")
-    .single();
-  if (uwError || !uw) return err("Falha ao salvar a ficha.");
-
-  if (overrides.length > 0) {
-    await supabase.from("user_workout_overrides").insert(
-      overrides.map((o) => ({
-        user_workout_id: uw.id,
-        workout_exercise_id: o.workoutExerciseId,
-        substitute_exercise_id: o.substituteExerciseId,
-        reason: o.reason,
-      })),
-    );
-  }
-
-  return ok({ templateId: chosenId, overrideCount: overrides.length });
+  return err("Nenhuma ficha viável para o seu perfil.");
 }
