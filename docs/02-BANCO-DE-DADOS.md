@@ -1,4 +1,4 @@
-# GymGuide — FASE 1 · Modelagem do Banco de Dados (v2)
+# TreinoFácil — FASE 1 · Modelagem do Banco de Dados (v2)
 
 > PostgreSQL / Supabase. DDL abaixo é o **modelo** desta fase; a migration real entra na FASE 2.
 > **v2** incorpora: evolução física, novos objetivos, limitações, equipamentos por usuário, favoritos, pipeline Selector/Validator/Generator, progressão de exercícios, programas com evolução automática, gamificação, estatísticas e analytics de admin.

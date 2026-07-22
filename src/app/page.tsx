@@ -1,65 +1,95 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { ArrowRight, Dumbbell } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
+import { Logo } from "@/components/shared/logo";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { ROUTES } from "@/lib/routes";
+
+const container = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.12, delayChildren: 0.1 } },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 16 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 120, damping: 18 },
+  },
+} as const;
+
+export default function LandingPage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="relative flex min-h-dvh flex-col overflow-hidden">
+      {/* Glow do accent ao fundo */}
+      <div
+        aria-hidden
+        className="bg-primary/20 pointer-events-none absolute -top-32 left-1/2 size-[36rem] -translate-x-1/2 rounded-full blur-[120px]"
+      />
+
+      <header className="relative z-10 mx-auto flex w-full max-w-md items-center justify-between px-6 pt-6">
+        <Logo />
+        <ThemeToggle />
+      </header>
+
+      <motion.main
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="relative z-10 mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 pb-10"
+      >
+        <motion.div
+          variants={item}
+          className="border-border/60 bg-muted/40 text-muted-foreground mb-8 inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium backdrop-blur"
+        >
+          <Dumbbell className="text-primary size-3.5" />
+          Treinos por regras, sem IA
+        </motion.div>
+
+        <motion.h1
+          variants={item}
+          className="text-foreground text-5xl leading-[1.05] font-bold tracking-tight text-balance"
+        >
+          Seu treino,
+          <br />
+          do seu <span className="text-primary">jeito</span>.
+        </motion.h1>
+
+        <motion.p
+          variants={item}
+          className="text-muted-foreground mt-5 text-lg leading-relaxed text-pretty"
+        >
+          Uma ficha personalizada para o seu objetivo, nível, tempo e
+          equipamentos — montada na hora, direto ao ponto.
+        </motion.p>
+
+        <motion.div variants={item} className="mt-10 flex flex-col gap-3">
+          <Link
+            href={ROUTES.signup}
+            className={cn(
+              buttonVariants({ size: "lg" }),
+              "h-14 rounded-2xl text-base font-semibold",
+            )}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Começar agora
+            <ArrowRight className="size-5" />
+          </Link>
+          <Link
+            href={ROUTES.login}
+            className={cn(
+              buttonVariants({ variant: "ghost", size: "lg" }),
+              "h-12 rounded-2xl text-base",
+            )}
           >
-            Documentation
-          </a>
-        </div>
-      </main>
+            Já tenho conta
+          </Link>
+        </motion.div>
+      </motion.main>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-# GymGuide — FASE 1 · Fluxos, Casos de Uso e Regras de Negócio (v2)
+# TreinoFácil — FASE 1 · Fluxos, Casos de Uso e Regras de Negócio (v2)
 
 > **v2** substitui o `WorkoutMatcher` único pelo pipeline **Selector → Validator → Generator**, e adiciona progressão automática, gamificação, evolução física, dashboard completo e analytics de admin. **Zero IA — tudo é regra + banco.**
 
@@ -47,10 +47,12 @@ selectAndAssign(user):
   # prioriza PROGRAMA (evolução automática); cai p/ ficha avulsa se não houver
   candidatos = SELECT programas/templates WHERE
         is_active AND goal_id = ctx.goal
-        AND days_per_week <= ctx.days
-        AND session_duration_minutes <= ctx.time
-        AND rank(min_location) <= rank(ctx.location)
-  score(t) = expMatch(t,ctx)*100 + daysFit + timeFit + locFit + t.priority
+        AND days_per_week <= ctx.days            # nunca exige mais dias
+        AND session_duration_minutes <= ctx.time # nunca exige mais tempo
+  # AMBIENTE não é filtro rígido: uma ficha de ambiente mais equipado ainda pode
+  # ser escolhida e ADAPTADA pelo Generator (troca os aparelhos que faltam). A
+  # viabilidade real é por equipamento (§2), com teto de adaptação (MAX_ADAPT ~50%).
+  score(t) = expMatch(t,ctx)*100 + daysFit + timeFit + locFit(|Δambiente|) + t.priority
   ordena candidatos por score desc
 
   # ─────────────── 2) WorkoutValidator ───────────────
@@ -60,10 +62,11 @@ selectAndAssign(user):
            incompat = falta equipamento exigido (exercise_equipments \ ctx.equipments)
                    OU contraindicado ('avoid' em exercise_limitations ∩ ctx.limitations)
            se incompat: precisa de substituto (Generator.canSubstitute(wx, ctx))
-        viável = (% incompatíveis SEM substituto) == 0
-                 E (% incompatíveis <= LIMITE_SUBSTITUICAO, ex. 60%)
+        viável = nenhum dia fica com < 3 exercícios
+                 E (adaptados / total <= MAX_ADAPT_FRACTION, ex. 50%)
      se report.viável: escolhido = candidato; break
   # a invariante de seed (ficha peso_corporal/sem-restrição) garante ≥1 viável
+  # (quem só tem peso corporal: fichas de academia estouram o teto → cai no fallback)
 
   # ─────────────── 3) WorkoutGenerator ───────────────
   overrides = []
@@ -113,7 +116,7 @@ Selector acha "Hipertrofia Iniciante 4 dias"; Validator marca "Leg Press" (equip
 ## 4. Regras de mapeamento
 
 - **Experiência → nível:** `never|up_to_6m → beginner`, `6m_to_2y → intermediate`, `over_2y → advanced`.
-- **Ambiente (capacidade):** `home < condo < small_gym < full_gym`; ficha viável se `rank(usuário) ≥ rank(min_location)`.
+- **Ambiente (capacidade):** `home < condo < small_gym < full_gym`. Não é filtro rígido — o `min_location` da ficha é um **sinal de pontuação** (prefere a ficha do ambiente mais próximo, `|Δ|`) e a compatibilidade real é por **equipamento** + **teto de adaptação**. Assim, um usuário de academia pequena pode receber uma ficha de academia adaptada, e quem só tem peso corporal cai no fallback.
 - **Equipamento (req. 4):** exercício é executável se `exercise_equipments(is_required) ⊆ user_equipments`. `peso_corporal` é sempre concedido a todos.
 - **Limitação (req. 3):** exercício com `exercise_limitations.restriction = 'avoid'` para qualquer limitação do usuário **nunca** é atribuído; `'caution'` é atribuído com aviso na tela.
 - **Descanso:** default de `workout_exercises.rest_seconds`; usuário sobrescreve p/ 60/90/120s.
