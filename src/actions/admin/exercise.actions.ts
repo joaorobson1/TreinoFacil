@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/infrastructure/supabase/server";
+import { isCallerAdmin } from "@/infrastructure/auth/assert-admin";
 import { type Result, ok, err } from "@/core/shared/result";
 import { slugify } from "@/lib/slugify";
 import { type ExerciseInput, exerciseSchema } from "@/lib/validations/exercise";
@@ -67,6 +68,7 @@ export async function createExerciseAction(
   if (!parsed.success) return err(parsed.error.issues[0]?.message ?? "Dados inválidos.");
   const d = parsed.data;
 
+  if (!(await isCallerAdmin())) return err("Apenas administradores.");
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("exercises")
@@ -93,6 +95,7 @@ export async function updateExerciseAction(
   if (!parsed.success) return err(parsed.error.issues[0]?.message ?? "Dados inválidos.");
   const d = parsed.data;
 
+  if (!(await isCallerAdmin())) return err("Apenas administradores.");
   const supabase = await createClient();
   const { error } = await supabase.from("exercises").update(toRow(d)).eq("id", id);
   if (error) return err("Falha ao salvar o exercício.");
@@ -106,6 +109,7 @@ export async function toggleExerciseActiveAction(
   id: string,
   isActive: boolean,
 ): Promise<Result<null>> {
+  if (!(await isCallerAdmin())) return err("Apenas administradores.");
   const supabase = await createClient();
   const { error } = await supabase
     .from("exercises")
@@ -117,6 +121,7 @@ export async function toggleExerciseActiveAction(
 }
 
 export async function deleteExerciseAction(id: string): Promise<Result<null>> {
+  if (!(await isCallerAdmin())) return err("Apenas administradores.");
   const supabase = await createClient();
   const { error } = await supabase.from("exercises").delete().eq("id", id);
   if (error) {

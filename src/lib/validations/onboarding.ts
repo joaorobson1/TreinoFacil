@@ -2,7 +2,13 @@ import { z } from "zod";
 
 export const onboardingSchema = z.object({
   sex: z.enum(["male", "female", "other"]),
-  age: z.coerce.number().int().min(10, "Idade inválida").max(100, "Idade inválida"),
+  // Mínimo 16 anos: o app coleta dados de saúde e prescreve treino, o que exige
+  // consentimento parental específico para menores (LGPD art. 14).
+  age: z.coerce
+    .number()
+    .int()
+    .min(16, "É necessário ter pelo menos 16 anos")
+    .max(100, "Idade inválida"),
   height_cm: z.coerce.number().min(100, "Altura inválida").max(250, "Altura inválida"),
   weight_kg: z.coerce.number().min(30, "Peso inválido").max(300, "Peso inválido"),
   goal_id: z.coerce.number().int().positive("Selecione um objetivo"),

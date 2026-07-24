@@ -1,3 +1,6 @@
+// Falha o BUILD se este módulo for importado de um componente cliente —
+// impede que a service role key acabe no bundle enviado ao navegador.
+import "server-only";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
 import { SUPABASE_URL } from "@/lib/env";

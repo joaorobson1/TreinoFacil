@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/infrastructure/supabase/server";
+import { isCallerAdmin } from "@/infrastructure/auth/assert-admin";
 import { type Result, ok, err } from "@/core/shared/result";
 import {
   type DayExerciseInput,
@@ -36,6 +37,7 @@ export async function createTemplateAction(
   const parsed = templateMetaSchema.safeParse(input);
   if (!parsed.success) return err(parsed.error.issues[0]?.message ?? "Dados inválidos.");
 
+  if (!(await isCallerAdmin())) return err("Apenas administradores.");
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("workout_templates")
@@ -54,6 +56,7 @@ export async function updateTemplateMetaAction(
   const parsed = templateMetaSchema.safeParse(input);
   if (!parsed.success) return err(parsed.error.issues[0]?.message ?? "Dados inválidos.");
 
+  if (!(await isCallerAdmin())) return err("Apenas administradores.");
   const supabase = await createClient();
   const { error } = await supabase
     .from("workout_templates")
@@ -65,6 +68,7 @@ export async function updateTemplateMetaAction(
 }
 
 export async function deleteTemplateAction(id: string): Promise<Result<null>> {
+  if (!(await isCallerAdmin())) return err("Apenas administradores.");
   const supabase = await createClient();
   const { error } = await supabase.from("workout_templates").delete().eq("id", id);
   if (error) {
@@ -80,6 +84,7 @@ export async function deleteTemplateAction(id: string): Promise<Result<null>> {
 
 // ---------------- DIAS ----------------
 export async function addDayAction(templateId: string): Promise<Result<null>> {
+  if (!(await isCallerAdmin())) return err("Apenas administradores.");
   const supabase = await createClient();
   const { data: last } = await supabase
     .from("workout_days")
@@ -105,6 +110,7 @@ export async function updateDayAction(
   values: { name: string; focus: string },
 ): Promise<Result<null>> {
   if (values.name.trim().length < 1) return err("Informe o nome do dia.");
+  if (!(await isCallerAdmin())) return err("Apenas administradores.");
   const supabase = await createClient();
   const { error } = await supabase
     .from("workout_days")
@@ -119,6 +125,7 @@ export async function deleteDayAction(
   dayId: string,
   templateId: string,
 ): Promise<Result<null>> {
+  if (!(await isCallerAdmin())) return err("Apenas administradores.");
   const supabase = await createClient();
   const { error } = await supabase.from("workout_days").delete().eq("id", dayId);
   if (error) return err("Falha ao excluir o dia.");
@@ -135,6 +142,7 @@ export async function addDayExerciseAction(
   const parsed = dayExerciseSchema.safeParse(input);
   if (!parsed.success) return err(parsed.error.issues[0]?.message ?? "Dados inválidos.");
 
+  if (!(await isCallerAdmin())) return err("Apenas administradores.");
   const supabase = await createClient();
   const { data: last } = await supabase
     .from("workout_exercises")
@@ -163,6 +171,7 @@ export async function updateDayExerciseAction(
   templateId: string,
   values: { sets: number; reps: string; rest: number },
 ): Promise<Result<null>> {
+  if (!(await isCallerAdmin())) return err("Apenas administradores.");
   const supabase = await createClient();
   const { error } = await supabase
     .from("workout_exercises")
@@ -177,6 +186,7 @@ export async function deleteDayExerciseAction(
   weId: string,
   templateId: string,
 ): Promise<Result<null>> {
+  if (!(await isCallerAdmin())) return err("Apenas administradores.");
   const supabase = await createClient();
   const { error } = await supabase.from("workout_exercises").delete().eq("id", weId);
   if (error) return err("Falha ao excluir o exercício.");

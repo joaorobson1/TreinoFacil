@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +30,9 @@ type Opt = { id: number; slug: string; name: string; category?: string | null };
 type GoalOpt = { id: number; name: string; description: string | null };
 
 const TOTAL_STEPS = 8;
+
+/** Idade mínima: coletamos dados de saúde e prescrevemos treino (LGPD art. 14). */
+const MIN_AGE = 16;
 
 const STEP_META = [
   { title: "Sobre você", subtitle: "Vamos calibrar o treino pelo seu corpo." },
@@ -126,7 +129,7 @@ export function OnboardingWizard({
       case 0:
         return (
           !!sex &&
-          num(age) >= 10 && num(age) <= 100 &&
+          num(age) >= MIN_AGE && num(age) <= 100 &&
           num(height) >= 100 && num(height) <= 250 &&
           num(weight) >= 30 && num(weight) <= 300
         );
@@ -254,7 +257,7 @@ export function OnboardingWizard({
                 <div className="grid grid-cols-3 gap-3">
                   <div className="space-y-1.5">
                     <Label htmlFor="age">Idade</Label>
-                    <Input id="age" type="number" inputMode="numeric" value={age}
+                    <Input id="age" type="number" inputMode="numeric" min={MIN_AGE} value={age}
                       onChange={(e) => setAge(e.target.value)} className="h-12 rounded-xl" placeholder="25" />
                   </div>
                   <div className="space-y-1.5">
@@ -268,6 +271,11 @@ export function OnboardingWizard({
                       onChange={(e) => setWeight(e.target.value)} className="h-12 rounded-xl" placeholder="72" />
                   </div>
                 </div>
+                {age !== "" && num(age) < MIN_AGE && (
+                  <p className="text-destructive text-sm">
+                    É necessário ter pelo menos {MIN_AGE} anos para usar o TreinoFácil.
+                  </p>
+                )}
               </div>
             )}
 
@@ -337,13 +345,23 @@ export function OnboardingWizard({
             )}
 
             {step === 7 && (
-              <div className="flex flex-wrap gap-2">
-                {limitations.map((l) => (
-                  <SelectChip key={l.id} selected={limitationIds.includes(l.id)}
-                    onClick={() => toggleLimitation(l.id)}>
-                    {l.name}
-                  </SelectChip>
-                ))}
+              <div className="space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  {limitations.map((l) => (
+                    <SelectChip key={l.id} selected={limitationIds.includes(l.id)}
+                      onClick={() => toggleLimitation(l.id)}>
+                      {l.name}
+                    </SelectChip>
+                  ))}
+                </div>
+                <div className="flex gap-2.5 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3">
+                  <ShieldAlert className="mt-0.5 size-4 shrink-0 text-amber-500" />
+                  <p className="text-muted-foreground text-xs leading-snug">
+                    O ajuste por limitações é um filtro automático de segurança, não
+                    uma avaliação médica. Consulte um médico antes de começar,
+                    principalmente se tem alguma condição de saúde.
+                  </p>
+                </div>
               </div>
             )}
           </motion.div>

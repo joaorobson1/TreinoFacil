@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/infrastructure/supabase/server";
+import { isCallerAdmin } from "@/infrastructure/auth/assert-admin";
 import { type Result, ok, err } from "@/core/shared/result";
 import { slugify } from "@/lib/slugify";
 import { LOOKUPS, type LookupTable } from "@/lib/admin/lookups";
@@ -25,6 +26,7 @@ export async function saveLookupAction(input: {
     row[f.key] = v || (f.key === "name" ? name : null);
   }
 
+  if (!(await isCallerAdmin())) return err("Apenas administradores.");
   const supabase = await createClient();
   const db: any = supabase;
 
@@ -50,6 +52,7 @@ export async function deleteLookupAction(
   id: number,
 ): Promise<Result<null>> {
   if (!LOOKUPS[table]) return err("Tabela inválida.");
+  if (!(await isCallerAdmin())) return err("Apenas administradores.");
   const supabase = await createClient();
   const db: any = supabase;
   const { error } = await db.from(table).delete().eq("id", id);

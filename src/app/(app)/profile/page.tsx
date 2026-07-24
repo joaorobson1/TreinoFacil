@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/infrastructure/supabase/server";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
@@ -113,6 +114,16 @@ export default async function ProfilePage() {
               ?.label ?? dash
           }
         />
+      </section>
+
+      <section className="mb-8 flex items-center justify-center gap-2 text-sm">
+        <Link href={ROUTES.terms} className="text-muted-foreground hover:text-foreground">
+          Termos de Uso
+        </Link>
+        <span className="text-muted-foreground/40">·</span>
+        <Link href={ROUTES.privacy} className="text-muted-foreground hover:text-foreground">
+          Política de Privacidade
+        </Link>
       </section>
 
       <SignOutButton />

@@ -17,6 +17,8 @@ export const ROUTES = {
   achievements: "/achievements",
   profile: "/profile",
   admin: "/admin",
+  privacy: "/privacidade",
+  terms: "/termos",
 } as const;
 
 /** Rotas que exigem sessão autenticada. */

@@ -103,6 +103,21 @@ export default function LandingPage() {
             Já tenho conta
           </Link>
         </motion.div>
+
+        <motion.p
+          variants={item}
+          className="text-muted-foreground/70 mt-8 text-center text-xs"
+        >
+          Ao continuar você concorda com os{" "}
+          <Link href={ROUTES.terms} className="hover:text-foreground underline">
+            Termos
+          </Link>{" "}
+          e a{" "}
+          <Link href={ROUTES.privacy} className="hover:text-foreground underline">
+            Política de Privacidade
+          </Link>
+          .
+        </motion.p>
       </motion.main>
     </div>
   );

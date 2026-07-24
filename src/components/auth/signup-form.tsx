@@ -24,7 +24,13 @@ export function SignupForm() {
     formState: { errors, isSubmitting },
   } = useForm<SignUpInput>({
     resolver: zodResolver(signUpSchema),
-    defaultValues: { name: "", email: "", whatsapp: "", password: "" },
+    defaultValues: {
+      name: "",
+      email: "",
+      whatsapp: "",
+      password: "",
+      healthConsent: false as unknown as true,
+    },
   });
 
   async function onSubmit(values: SignUpInput) {
@@ -142,6 +148,31 @@ export function SignupForm() {
           </div>
           {errors.password && (
             <p className="text-destructive text-sm">{errors.password.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="flex cursor-pointer items-start gap-3 text-sm">
+            <input
+              type="checkbox"
+              className="accent-primary mt-0.5 size-4 shrink-0"
+              {...register("healthConsent")}
+            />
+            <span className="text-muted-foreground leading-snug">
+              Tenho 16 anos ou mais, li e concordo com os{" "}
+              <Link href={ROUTES.terms} target="_blank" className="text-primary hover:underline">
+                Termos de Uso
+              </Link>{" "}
+              e a{" "}
+              <Link href={ROUTES.privacy} target="_blank" className="text-primary hover:underline">
+                Política de Privacidade
+              </Link>
+              , e autorizo o uso das minhas informações de saúde para personalizar
+              meus treinos.
+            </span>
+          </label>
+          {errors.healthConsent && (
+            <p className="text-destructive text-sm">{errors.healthConsent.message}</p>
           )}
         </div>
 

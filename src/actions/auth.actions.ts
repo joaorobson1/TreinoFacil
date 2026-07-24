@@ -34,10 +34,20 @@ export async function signUpAction(
   const { name, email, whatsapp, password } = parsed.data;
 
   const supabase = await createClient();
+  // O consentimento vai nos metadados porque a linha em `public.users` só nasce
+  // depois, pelo trigger handle_new_user — que copia estes carimbos de tempo.
+  const consentedAt = new Date().toISOString();
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { name, whatsapp } },
+    options: {
+      data: {
+        name,
+        whatsapp,
+        terms_accepted_at: consentedAt,
+        health_consent_at: consentedAt,
+      },
+    },
   });
 
   if (error) return err(mapAuthError(error.message));

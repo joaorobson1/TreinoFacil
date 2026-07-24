@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/infrastructure/supabase/server";
+import { isCallerAdmin } from "@/infrastructure/auth/assert-admin";
 import { type Result, ok, err } from "@/core/shared/result";
 import { slugify } from "@/lib/slugify";
 import {
@@ -28,6 +29,7 @@ export async function createAchievementAction(
   const parsed = achievementSchema.safeParse(input);
   if (!parsed.success) return err(parsed.error.issues[0]?.message ?? "Dados inválidos.");
 
+  if (!(await isCallerAdmin())) return err("Apenas administradores.");
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("achievements")
@@ -50,6 +52,7 @@ export async function updateAchievementAction(
   const parsed = achievementSchema.safeParse(input);
   if (!parsed.success) return err(parsed.error.issues[0]?.message ?? "Dados inválidos.");
 
+  if (!(await isCallerAdmin())) return err("Apenas administradores.");
   const supabase = await createClient();
   const { error } = await supabase.from("achievements").update(toRow(parsed.data)).eq("id", id);
   if (error) return err("Falha ao salvar.");
@@ -58,6 +61,7 @@ export async function updateAchievementAction(
 }
 
 export async function deleteAchievementAction(id: number): Promise<Result<null>> {
+  if (!(await isCallerAdmin())) return err("Apenas administradores.");
   const supabase = await createClient();
   const { error } = await supabase.from("achievements").delete().eq("id", id);
   if (error) {
