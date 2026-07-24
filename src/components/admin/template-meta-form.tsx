@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { cn } from "@/lib/utils";
 import type {
   ExerciseLevel,
@@ -45,7 +46,6 @@ export function TemplateMetaForm({
 }) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [f, setF] = useState<TemplateMetaInput>({
     name: initial?.name ?? "",
     goalId: initial?.goalId ?? 0,
@@ -85,12 +85,8 @@ export function TemplateMetaForm({
 
   async function remove() {
     if (!initial) return;
-    setDeleting(true);
     const res = await deleteTemplateAction(initial.id);
-    if (!res.ok) {
-      setDeleting(false);
-      return toast.error(res.error);
-    }
+    if (!res.ok) return toast.error(res.error);
     toast.success("Ficha excluída.");
     router.push("/admin/templates");
   }
@@ -171,9 +167,22 @@ export function TemplateMetaForm({
           {saving ? <Loader2 className="size-5 animate-spin" /> : initial ? "Salvar ficha" : "Criar ficha"}
         </Button>
         {initial && (
-          <Button variant="destructive" onClick={remove} disabled={deleting} className="h-12 rounded-2xl">
-            {deleting ? <Loader2 className="size-5 animate-spin" /> : <Trash2 className="size-5" />}
-          </Button>
+          <ConfirmDialog
+            title="Excluir ficha?"
+            description={
+              <>
+                A ficha <strong>{f.name}</strong> e todos os seus dias e exercícios
+                serão removidos. Esta ação não pode ser desfeita.
+              </>
+            }
+            confirmLabel="Excluir"
+            onConfirm={remove}
+            trigger={
+              <Button variant="destructive" className="h-12 rounded-2xl" aria-label="Excluir ficha">
+                <Trash2 className="size-5" />
+              </Button>
+            }
+          />
         )}
       </div>
     </div>

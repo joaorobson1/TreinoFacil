@@ -6,6 +6,7 @@ import { Check, Pencil, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import {
   deleteLookupAction,
   saveLookupAction,
@@ -97,9 +98,17 @@ function LookupSection({ config, rows }: { config: LookupConfig; rows: Row[] }) 
                 >
                   <Pencil className="size-4" />
                 </Button>
-                <Button size="icon" variant="ghost" className="text-destructive rounded-lg" onClick={() => remove(r.id)}>
-                  <Trash2 className="size-4" />
-                </Button>
+                <ConfirmDialog
+                  title={`Excluir "${r.name}"?`}
+                  description="O item será removido do catálogo. Registros que o utilizam impedem a exclusão."
+                  confirmLabel="Excluir"
+                  onConfirm={() => remove(r.id)}
+                  trigger={
+                    <Button size="icon" variant="ghost" className="text-destructive rounded-lg" aria-label="Excluir">
+                      <Trash2 className="size-4" />
+                    </Button>
+                  }
+                />
               </>
             )}
           </div>

@@ -6,6 +6,7 @@ import { Loader2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { ADVANCE_CRITERIA } from "@/lib/validations/program";
 import type { AdvanceCriteria } from "@/core/domain/enums";
 import {
@@ -40,7 +41,6 @@ export function ProgramPhasesEditor({
   const [criteria, setCriteria] = useState<AdvanceCriteria>("workouts_completed");
   const [threshold, setThreshold] = useState("12");
   const [busy, setBusy] = useState(false);
-  const [removing, setRemoving] = useState<string | null>(null);
 
   const criteriaLabel = (c: string) => ADVANCE_CRITERIA.find((x) => x.value === c)?.label ?? c;
 
@@ -63,12 +63,8 @@ export function ProgramPhasesEditor({
   }
 
   async function remove(id: string) {
-    setRemoving(id);
     const res = await deletePhaseAction(id, programId);
-    if (!res.ok) {
-      setRemoving(null);
-      return toast.error(res.error);
-    }
+    if (!res.ok) return toast.error(res.error);
     router.refresh();
   }
 
@@ -88,10 +84,17 @@ export function ProgramPhasesEditor({
                 {p.templateName} · avança em {p.threshold} ({criteriaLabel(p.criteria)})
               </p>
             </div>
-            <Button size="icon" variant="ghost" className="text-destructive size-8 rounded-lg"
-              onClick={() => remove(p.id)} disabled={removing === p.id} aria-label="Remover">
-              {removing === p.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
-            </Button>
+            <ConfirmDialog
+              title="Excluir fase?"
+              description={<>A fase <strong>{p.name}</strong> será removida do programa.</>}
+              confirmLabel="Excluir"
+              onConfirm={() => remove(p.id)}
+              trigger={
+                <Button size="icon" variant="ghost" className="text-destructive size-8 rounded-lg" aria-label="Remover">
+                  <Trash2 className="size-4" />
+                </Button>
+              }
+            />
           </div>
         ))}
         {phases.length === 0 && (

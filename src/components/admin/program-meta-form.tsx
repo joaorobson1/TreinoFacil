@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { cn } from "@/lib/utils";
 import type { ExerciseLevel } from "@/core/domain/enums";
 import type { ProgramMetaInput } from "@/lib/validations/program";
@@ -36,7 +37,6 @@ export function ProgramMetaForm({
 }) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [f, setF] = useState<ProgramMetaInput>({
     name: initial?.name ?? "",
     goalId: initial?.goalId ?? 0,
@@ -69,12 +69,8 @@ export function ProgramMetaForm({
 
   async function remove() {
     if (!initial) return;
-    setDeleting(true);
     const res = await deleteProgramAction(initial.id);
-    if (!res.ok) {
-      setDeleting(false);
-      return toast.error(res.error);
-    }
+    if (!res.ok) return toast.error(res.error);
     toast.success("Programa excluído.");
     router.push("/admin/programs");
   }
@@ -119,9 +115,22 @@ export function ProgramMetaForm({
           {saving ? <Loader2 className="size-5 animate-spin" /> : initial ? "Salvar programa" : "Criar programa"}
         </Button>
         {initial && (
-          <Button variant="destructive" onClick={remove} disabled={deleting} className="h-12 rounded-2xl">
-            {deleting ? <Loader2 className="size-5 animate-spin" /> : <Trash2 className="size-5" />}
-          </Button>
+          <ConfirmDialog
+            title="Excluir programa?"
+            description={
+              <>
+                O programa <strong>{f.name}</strong> e todas as suas fases serão
+                removidos. Esta ação não pode ser desfeita.
+              </>
+            }
+            confirmLabel="Excluir"
+            onConfirm={remove}
+            trigger={
+              <Button variant="destructive" className="h-12 rounded-2xl" aria-label="Excluir programa">
+                <Trash2 className="size-5" />
+              </Button>
+            }
+          />
         )}
       </div>
     </div>

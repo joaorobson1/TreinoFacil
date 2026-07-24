@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { SelectChip } from "@/components/onboarding/option-card";
 import { cn } from "@/lib/utils";
 import type { ExerciseLevel, MediaType } from "@/core/domain/enums";
@@ -47,7 +48,6 @@ export function ExerciseForm({
 }) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -108,12 +108,8 @@ export function ExerciseForm({
 
   async function remove() {
     if (!initial) return;
-    setDeleting(true);
     const result = await deleteExerciseAction(initial.id);
-    if (!result.ok) {
-      setDeleting(false);
-      return toast.error(result.error);
-    }
+    if (!result.ok) return toast.error(result.error);
     toast.success("Exercício excluído.");
     router.push("/admin/exercises");
     router.refresh();
@@ -253,9 +249,22 @@ export function ExerciseForm({
           {saving ? <Loader2 className="size-5 animate-spin" /> : initial ? "Salvar" : "Criar exercício"}
         </Button>
         {initial && (
-          <Button variant="destructive" onClick={remove} disabled={deleting} className="h-12 rounded-2xl">
-            {deleting ? <Loader2 className="size-5 animate-spin" /> : <Trash2 className="size-5" />}
-          </Button>
+          <ConfirmDialog
+            title="Excluir exercício?"
+            description={
+              <>
+                <strong>{f.name || "Este exercício"}</strong> será removido do
+                catálogo. Fichas que o utilizam podem ser afetadas.
+              </>
+            }
+            confirmLabel="Excluir"
+            onConfirm={remove}
+            trigger={
+              <Button variant="destructive" className="h-12 rounded-2xl" aria-label="Excluir exercício">
+                <Trash2 className="size-5" />
+              </Button>
+            }
+          />
         )}
       </div>
     </div>

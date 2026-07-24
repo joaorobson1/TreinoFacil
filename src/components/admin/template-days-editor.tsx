@@ -6,6 +6,7 @@ import { Check, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import {
   addDayAction,
   addDayExerciseAction,
@@ -54,9 +55,17 @@ function ExerciseRow({ templateId, we }: { templateId: string; we: WE }) {
       <Button size="icon" variant="ghost" className="size-9 rounded-lg" onClick={save} disabled={busy} aria-label="Salvar">
         <Check className="size-4" />
       </Button>
-      <Button size="icon" variant="ghost" className="text-destructive size-9 rounded-lg" onClick={remove} aria-label="Remover">
-        <Trash2 className="size-4" />
-      </Button>
+      <ConfirmDialog
+        title="Remover exercício?"
+        description={<>Remover <strong>{we.name}</strong> deste dia?</>}
+        confirmLabel="Remover"
+        onConfirm={remove}
+        trigger={
+          <Button size="icon" variant="ghost" className="text-destructive size-9 rounded-lg" aria-label="Remover">
+            <Trash2 className="size-4" />
+          </Button>
+        }
+      />
     </div>
   );
 }
@@ -106,9 +115,17 @@ function DayCard({
       <div className="mb-2 flex items-center gap-2">
         <Input value={name} onChange={(e) => setName(e.target.value)} onBlur={saveDay}
           className="h-9 flex-1 rounded-lg font-semibold" placeholder="Nome do dia" />
-        <Button size="icon" variant="ghost" className="text-destructive size-9 rounded-lg" onClick={removeDay} aria-label="Excluir dia">
-          <Trash2 className="size-4" />
-        </Button>
+        <ConfirmDialog
+          title="Excluir dia?"
+          description={<>O dia <strong>{name || "sem nome"}</strong> e seus exercícios serão removidos da ficha.</>}
+          confirmLabel="Excluir"
+          onConfirm={removeDay}
+          trigger={
+            <Button size="icon" variant="ghost" className="text-destructive size-9 rounded-lg" aria-label="Excluir dia">
+              <Trash2 className="size-4" />
+            </Button>
+          }
+        />
       </div>
       <Input value={focus} onChange={(e) => setFocus(e.target.value)} onBlur={saveDay}
         className="mb-3 h-9 rounded-lg text-sm" placeholder="Foco (ex.: Peito e Tríceps)" />

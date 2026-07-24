@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import {
   type AchievementInput,
   ACHIEVEMENT_CRITERIA,
@@ -27,7 +28,6 @@ const areaCls =
 export function AchievementForm({ initial }: { initial?: AchievementInitial }) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [f, setF] = useState<AchievementInput>({
     name: initial?.name ?? "",
     description: initial?.description ?? "",
@@ -67,12 +67,8 @@ export function AchievementForm({ initial }: { initial?: AchievementInitial }) {
 
   async function remove() {
     if (!initial) return;
-    setDeleting(true);
     const res = await deleteAchievementAction(initial.id);
-    if (!res.ok) {
-      setDeleting(false);
-      return toast.error(res.error);
-    }
+    if (!res.ok) return toast.error(res.error);
     toast.success("Conquista excluída.");
     router.push("/admin/achievements");
     router.refresh();
@@ -135,9 +131,22 @@ export function AchievementForm({ initial }: { initial?: AchievementInitial }) {
           {saving ? <Loader2 className="size-5 animate-spin" /> : initial ? "Salvar" : "Criar conquista"}
         </Button>
         {initial && (
-          <Button variant="destructive" onClick={remove} disabled={deleting} className="h-12 rounded-2xl">
-            {deleting ? <Loader2 className="size-5 animate-spin" /> : <Trash2 className="size-5" />}
-          </Button>
+          <ConfirmDialog
+            title="Excluir conquista?"
+            description={
+              <>
+                A conquista <strong>{f.name}</strong> será removida. Usuários que já
+                a desbloquearam perderão o registro.
+              </>
+            }
+            confirmLabel="Excluir"
+            onConfirm={remove}
+            trigger={
+              <Button variant="destructive" className="h-12 rounded-2xl" aria-label="Excluir conquista">
+                <Trash2 className="size-5" />
+              </Button>
+            }
+          />
         )}
       </div>
     </div>

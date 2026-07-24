@@ -153,6 +153,7 @@ export default async function WorkoutPage() {
           label="Gerar novamente"
           variant="ghost"
           className="text-muted-foreground"
+          confirm
         />
       </div>
     </div>
