@@ -24,7 +24,7 @@ export default async function EditProgramPage({
     supabase
       .from("programs")
       .select(
-        "*, program_phases(id, phase_index, name, advance_criteria, advance_threshold, workout_templates(name))",
+        "*, program_phases(id, phase_index, name, template_id, advance_criteria, advance_threshold, duration_weeks, workout_templates(name))",
       )
       .eq("id", id)
       .maybeSingle(),
@@ -52,9 +52,11 @@ export default async function EditProgramPage({
       id: ph.id,
       phaseIndex: ph.phase_index,
       name: ph.name,
+      templateId: ph.template_id,
       templateName: ph.workout_templates?.name ?? "?",
       criteria: ph.advance_criteria,
       threshold: ph.advance_threshold,
+      durationWeeks: ph.duration_weeks,
     }));
 
   return (

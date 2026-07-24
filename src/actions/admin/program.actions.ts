@@ -113,6 +113,32 @@ export async function addPhaseAction(
   return ok(null);
 }
 
+export async function updatePhaseAction(
+  phaseId: string,
+  programId: string,
+  input: PhaseInput,
+): Promise<Result<null>> {
+  const parsed = phaseSchema.safeParse(input);
+  if (!parsed.success) return err(parsed.error.issues[0]?.message ?? "Dados inválidos.");
+  const d = parsed.data;
+
+  if (!(await isCallerAdmin())) return err("Apenas administradores.");
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("program_phases")
+    .update({
+      name: d.name,
+      template_id: d.templateId,
+      advance_criteria: d.advanceCriteria,
+      advance_threshold: d.advanceThreshold,
+      duration_weeks: d.durationWeeks,
+    })
+    .eq("id", phaseId);
+  if (error) return err("Falha ao salvar a fase.");
+  revalidate(programId);
+  return ok(null);
+}
+
 export async function deletePhaseAction(
   phaseId: string,
   programId: string,
