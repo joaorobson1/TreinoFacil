@@ -17,4 +17,6 @@ export type SessionExercise = {
   targetSets: number;
   targetReps: string;
   restSeconds: number;
+  /** melhor carga registrada da última vez neste exercício (kg), se houver */
+  lastWeight: number | null;
 };

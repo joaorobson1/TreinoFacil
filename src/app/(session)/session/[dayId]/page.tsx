@@ -101,6 +101,20 @@ export default async function SessionPage({
 
   const detailMap = new Map((details ?? []).map((d) => [d.id, d]));
 
+  // carga usada da última vez em cada exercício (referência durante o treino)
+  const { data: progress } = await supabase
+    .from("exercise_progress")
+    .select("exercise_id, top_weight_kg, performed_on")
+    .eq("user_id", user.id)
+    .in("exercise_id", effective.map((e) => e.exerciseId))
+    .order("performed_on", { ascending: false });
+  const lastWeightMap = new Map<string, number>();
+  for (const p of progress ?? []) {
+    if (!lastWeightMap.has(p.exercise_id) && p.top_weight_kg != null) {
+      lastWeightMap.set(p.exercise_id, Number(p.top_weight_kg));
+    }
+  }
+
   const exercises: SessionExercise[] = effective.flatMap((e) => {
     const d = detailMap.get(e.exerciseId);
     if (!d) return [];
@@ -129,6 +143,7 @@ export default async function SessionPage({
         targetSets: e.targetSets,
         targetReps: e.targetReps,
         restSeconds: e.restSeconds,
+        lastWeight: lastWeightMap.get(e.exerciseId) ?? null,
       },
     ];
   });

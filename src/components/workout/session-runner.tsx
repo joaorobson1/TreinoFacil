@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Clock, Dumbbell, PartyPopper, Repeat2, Weight } from "lucide-react";
 import { toast } from "sonner";
@@ -46,12 +46,23 @@ export function SessionRunner({
   const [sets, setSets] = useState<LoggedSet[][]>(() =>
     exercises.map((e) =>
       Array.from({ length: e.targetSets }, () => ({
-        weight: "",
+        weight: e.lastWeight != null ? String(e.lastWeight) : "",
         reps: initialReps(e.targetReps),
         done: false,
       })),
     ),
   );
+
+  // Evita perder o treino ao atualizar/fechar a aba durante a sessão.
+  useEffect(() => {
+    if (phase !== "running") return;
+    const warn = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [phase]);
 
   const summary = useMemo(() => {
     let volume = 0;

@@ -87,7 +87,14 @@ export function ExerciseScreen({
 
       {/* séries */}
       <div className="mt-6">
-        <p className="mb-2 text-sm font-semibold">Séries</p>
+        <div className="mb-2 flex items-baseline justify-between">
+          <p className="text-sm font-semibold">Séries</p>
+          {exercise.lastWeight != null && (
+            <p className="text-muted-foreground text-xs">
+              última vez: <span className="text-foreground font-medium">{exercise.lastWeight} kg</span>
+            </p>
+          )}
+        </div>
         <div className="space-y-2">
           {sets.map((set, i) => (
             <div
