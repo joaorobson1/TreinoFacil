@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronRight, Plus } from "lucide-react";
+import { Layers, Plus } from "lucide-react";
 import { createClient } from "@/infrastructure/supabase/server";
 import { buttonVariants } from "@/components/ui/button";
+import { AdminList, type AdminListItem } from "@/components/admin/admin-list";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Admin · Programas" };
@@ -20,7 +21,13 @@ export default async function AdminProgramsPage() {
     .select("id, name, experience, is_active, goals(name), program_phases(id)")
     .order("name");
 
-  const programs = data ?? [];
+  const items: AdminListItem[] = (data ?? []).map((p) => ({
+    id: p.id,
+    href: `/admin/programs/${p.id}`,
+    title: p.name,
+    subtitle: `${p.goals?.name ?? "—"} · ${EXPERIENCE[p.experience] ?? p.experience} · ${p.program_phases?.length ?? 0} fases`,
+    inactive: !p.is_active,
+  }));
 
   return (
     <div className="space-y-4">
@@ -32,38 +39,13 @@ export default async function AdminProgramsPage() {
         </Link>
       </div>
 
-      <p className="text-muted-foreground text-xs">{programs.length} programas</p>
-
-      <div className="space-y-2">
-        {programs.map((p) => (
-          <Link
-            key={p.id}
-            href={`/admin/programs/${p.id}`}
-            className="bg-card hover:border-foreground/20 flex items-center gap-3 rounded-2xl border p-3.5 transition-colors"
-          >
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <p className="truncate font-medium">{p.name}</p>
-                {!p.is_active && (
-                  <span className="bg-muted text-muted-foreground rounded-full px-1.5 py-0.5 text-[10px] font-medium">
-                    inativo
-                  </span>
-                )}
-              </div>
-              <p className="text-muted-foreground text-sm">
-                {p.goals?.name ?? "—"} · {EXPERIENCE[p.experience] ?? p.experience} ·{" "}
-                {p.program_phases?.length ?? 0} fases
-              </p>
-            </div>
-            <ChevronRight className="text-muted-foreground size-5 shrink-0" />
-          </Link>
-        ))}
-        {programs.length === 0 && (
-          <p className="text-muted-foreground text-sm">
-            Nenhum programa ainda. Crie o primeiro para ativar a progressão automática.
-          </p>
-        )}
-      </div>
+      <AdminList
+        items={items}
+        noun="programas"
+        icon={Layers}
+        emptyTitle="Nenhum programa ainda"
+        emptyHint="Crie o primeiro programa para ativar a progressão automática de fases."
+      />
     </div>
   );
 }

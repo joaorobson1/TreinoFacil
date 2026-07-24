@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronRight, Plus } from "lucide-react";
+import { Plus, Trophy } from "lucide-react";
 import { createClient } from "@/infrastructure/supabase/server";
 import { buttonVariants } from "@/components/ui/button";
+import { AdminList, type AdminListItem } from "@/components/admin/admin-list";
 import { ACHIEVEMENT_CRITERIA } from "@/lib/validations/achievement";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +19,14 @@ export default async function AdminAchievementsPage() {
   const label = (c: string) =>
     ACHIEVEMENT_CRITERIA.find((x) => x.value === c)?.label ?? c;
 
+  const items: AdminListItem[] = (data ?? []).map((a) => ({
+    id: String(a.id),
+    href: `/admin/achievements/${a.id}`,
+    title: a.name,
+    subtitle: `${label(a.criteria)} · meta ${a.threshold}`,
+    inactive: !a.is_active,
+  }));
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -28,30 +37,13 @@ export default async function AdminAchievementsPage() {
         </Link>
       </div>
 
-      <div className="space-y-2">
-        {(data ?? []).map((a) => (
-          <Link
-            key={a.id}
-            href={`/admin/achievements/${a.id}`}
-            className="bg-card hover:border-foreground/20 flex items-center gap-3 rounded-2xl border p-3.5 transition-colors"
-          >
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <p className="truncate font-medium">{a.name}</p>
-                {!a.is_active && (
-                  <span className="bg-muted text-muted-foreground rounded-full px-1.5 py-0.5 text-[10px] font-medium">
-                    inativa
-                  </span>
-                )}
-              </div>
-              <p className="text-muted-foreground text-sm">
-                {label(a.criteria)} · meta {a.threshold}
-              </p>
-            </div>
-            <ChevronRight className="text-muted-foreground size-5 shrink-0" />
-          </Link>
-        ))}
-      </div>
+      <AdminList
+        items={items}
+        noun="conquistas"
+        icon={Trophy}
+        emptyTitle="Nenhuma conquista ainda"
+        emptyHint="Crie conquistas para engajar os usuários conforme eles treinam."
+      />
     </div>
   );
 }
