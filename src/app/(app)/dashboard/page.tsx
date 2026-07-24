@@ -119,10 +119,16 @@ export default async function DashboardPage() {
           />
         </div>
 
-        <div className="bg-card rounded-2xl border p-5">
+        <Link
+          href={ROUTES.measurements}
+          className="bg-card hover:border-foreground/20 block rounded-2xl border p-5 transition-colors"
+        >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-muted-foreground text-xs">Peso atual</p>
+              <div className="flex items-center gap-1.5">
+                <p className="text-muted-foreground text-xs">Peso atual</p>
+                <ChevronRight className="text-muted-foreground size-3.5" />
+              </div>
               <div className="flex items-baseline gap-2">
                 <p className="text-2xl font-bold tabular-nums">
                   {formatWeight(weightNow)}
@@ -145,7 +151,7 @@ export default async function DashboardPage() {
             <span className="text-muted-foreground">Objetivo</span>
             <span className="font-medium">{goalName}</span>
           </div>
-        </div>
+        </Link>
 
         <Link
           href={ROUTES.achievements}
