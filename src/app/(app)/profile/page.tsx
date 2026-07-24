@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Pencil } from "lucide-react";
 import { createClient } from "@/infrastructure/supabase/server";
+import { buttonVariants } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { SignOutButton } from "@/components/shared/sign-out-button";
+import { cn } from "@/lib/utils";
 import {
   EXPERIENCE_OPTIONS,
   LOCATION_OPTIONS,
@@ -66,6 +69,17 @@ export default async function ProfilePage() {
           )}
         </div>
       </div>
+
+      <Link
+        href={`${ROUTES.profile}/edit`}
+        className={cn(
+          buttonVariants({ variant: "outline" }),
+          "mb-4 h-11 w-full rounded-2xl font-medium",
+        )}
+      >
+        <Pencil className="size-4" />
+        Editar perfil
+      </Link>
 
       <section className="bg-card mb-4 rounded-2xl border px-5 py-2">
         <p className="text-muted-foreground py-2 text-xs font-medium tracking-wide uppercase">
