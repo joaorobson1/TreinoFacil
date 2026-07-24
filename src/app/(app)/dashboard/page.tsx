@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { ChevronRight, Clock, Dumbbell, Layers, Repeat2, Trophy } from "lucide-react";
 import { createClient } from "@/infrastructure/supabase/server";
 import { getTodaysWorkout } from "@/infrastructure/workout/get-todays-workout";
+import { getUserProgram } from "@/infrastructure/workout/get-user-program";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { StatTile } from "@/components/dashboard/stat-tile";
 import { StreakRing } from "@/components/dashboard/streak-ring";
@@ -58,6 +59,13 @@ export default async function DashboardPage() {
   const record = stats?.longest_streak ?? 0;
 
   const today = await getTodaysWorkout(supabase, user.id);
+  const program = await getUserProgram(supabase, user.id);
+  const programRemaining = program
+    ? Math.max(0, program.progress.target - program.progress.done)
+    : 0;
+  const programPct = program && program.progress.target > 0
+    ? Math.round((program.progress.done / program.progress.target) * 100)
+    : 0;
 
   const [{ count: totalAch }, { count: ownedAch }] = await Promise.all([
     supabase
@@ -93,6 +101,32 @@ export default async function DashboardPage() {
 
       <div className="space-y-4">
         <TodayWorkoutCard workout={today} />
+
+        {program && (
+          <Link
+            href={ROUTES.programs}
+            className="bg-card hover:border-foreground/20 block rounded-2xl border p-4 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="bg-primary/10 text-primary flex size-11 shrink-0 items-center justify-center rounded-xl">
+                <Layers className="size-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-semibold">{program.programName}</p>
+                <p className="text-muted-foreground text-sm">
+                  Fase {program.currentIndex} de {program.totalPhases}
+                  {program.progress.kind === "workouts" &&
+                    programRemaining > 0 &&
+                    ` · faltam ${programRemaining} treino(s)`}
+                </p>
+              </div>
+              <ChevronRight className="text-muted-foreground size-5 shrink-0" />
+            </div>
+            <div className="bg-muted mt-3 h-1.5 overflow-hidden rounded-full">
+              <div className="bg-primary h-full rounded-full" style={{ width: `${programPct}%` }} />
+            </div>
+          </Link>
+        )}
 
         <StreakRing streak={streak} record={record} />
 
