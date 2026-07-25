@@ -6,6 +6,7 @@ import { createClient } from "@/infrastructure/supabase/server";
 import { buttonVariants } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { SignOutButton } from "@/components/shared/sign-out-button";
+import { AccountActions } from "@/components/profile/account-actions";
 import { cn } from "@/lib/utils";
 import {
   EXPERIENCE_OPTIONS,
@@ -128,6 +129,13 @@ export default async function ProfilePage() {
               ?.label ?? dash
           }
         />
+      </section>
+
+      <section className="mb-4">
+        <p className="text-muted-foreground mb-2 px-1 text-xs font-medium tracking-wide uppercase">
+          Conta e privacidade
+        </p>
+        <AccountActions />
       </section>
 
       <section className="mb-8 flex items-center justify-center gap-2 text-sm">
