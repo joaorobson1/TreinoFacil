@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { LineChart, TrendingUp } from "lucide-react";
+import { ChevronRight, LineChart, Scale, TrendingUp } from "lucide-react";
 import { createClient } from "@/infrastructure/supabase/server";
 import { EmptyState } from "@/components/shared/empty-state";
 import { formatWeight } from "@/lib/format";
@@ -24,16 +25,16 @@ export default async function ProgressPage() {
 
   const map = new Map<
     string,
-    { name: string; bestWeight: number; bestE1rm: number; last: string; sessions: number }
+    { id: string; name: string; bestWeight: number; bestE1rm: number; sessions: number }
   >();
   for (const r of rows ?? []) {
     const cur = map.get(r.exercise_id);
     if (!cur) {
       map.set(r.exercise_id, {
+        id: r.exercise_id,
         name: r.exercises?.name ?? "Exercício",
         bestWeight: Number(r.top_weight_kg ?? 0),
         bestE1rm: Number(r.best_e1rm ?? 0),
-        last: r.performed_on,
         sessions: 1,
       });
     } else {
@@ -56,14 +57,29 @@ export default async function ProgressPage() {
         />
       ) : (
         <>
+          <Link
+            href={ROUTES.measurements}
+            className="bg-card hover:border-foreground/20 mb-4 flex items-center gap-3 rounded-2xl border p-4 transition-colors"
+          >
+            <div className="bg-primary/10 text-primary flex size-11 shrink-0 items-center justify-center rounded-xl">
+              <Scale className="size-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold">Peso corporal e medidas</p>
+              <p className="text-muted-foreground text-sm">Acompanhe seu peso ao longo do tempo</p>
+            </div>
+            <ChevronRight className="text-muted-foreground size-5 shrink-0" />
+          </Link>
+
           <p className="text-muted-foreground mb-3 text-sm font-semibold">
-            Recordes por exercício
+            Evolução por exercício
           </p>
           <div className="space-y-2">
             {list.map((e) => (
-              <div
-                key={e.name}
-                className="bg-card flex items-center gap-3 rounded-2xl border p-4"
+              <Link
+                key={e.id}
+                href={`${ROUTES.progress}/${e.id}`}
+                className="bg-card hover:border-foreground/20 flex items-center gap-3 rounded-2xl border p-4 transition-colors"
               >
                 <div className="bg-primary/10 text-primary flex size-11 shrink-0 items-center justify-center rounded-xl">
                   <TrendingUp className="size-5" />
@@ -81,7 +97,8 @@ export default async function ProgressPage() {
                   </p>
                   <p className="text-muted-foreground text-[10px]">melhor carga</p>
                 </div>
-              </div>
+                <ChevronRight className="text-muted-foreground size-4 shrink-0" />
+              </Link>
             ))}
           </div>
         </>
