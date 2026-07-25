@@ -18,7 +18,17 @@ export async function assignWorkoutAction(): Promise<
   } = await supabase.auth.getUser();
   if (!user) return err("Sessão expirada.");
 
-  const result = await assignWorkoutForUser(supabase, user.id);
+  // Ficha ativa atual: ao regenerar, tentamos entregar uma DIFERENTE dela.
+  const { data: current } = await supabase
+    .from("user_workouts")
+    .select("template_id")
+    .eq("user_id", user.id)
+    .eq("is_active", true)
+    .maybeSingle();
+
+  const result = await assignWorkoutForUser(supabase, user.id, {
+    avoidTemplateId: current?.template_id ?? null,
+  });
   if (result.ok) {
     revalidatePath("/dashboard");
     revalidatePath("/workout");

@@ -239,6 +239,7 @@ async function tryEnrollProgram(
 export async function assignWorkoutForUser(
   supabase: DB,
   userId: string,
+  opts: { avoidTemplateId?: string | null } = {},
 ): Promise<Result<{ templateId: string; overrideCount: number }>> {
   const ctx = await loadUserContext(supabase, userId);
   if (!ctx) return err("Perfil incompleto para gerar a ficha.");
@@ -275,11 +276,22 @@ export async function assignWorkoutForUser(
   const ranked = rankCandidates(candidates, ctx);
   if (ranked.length === 0) return err("Nenhuma ficha compatível encontrada.");
 
+  // Variedade ao regenerar: entre as fichas viáveis (em ordem de encaixe),
+  // prefira uma DIFERENTE da atual. A atual só é reusada se for a única viável.
+  let currentViable: { templateId: string; overrides: WorkoutOverride[] } | null = null;
   for (const { template } of ranked) {
     const { overrides, viable } = await evaluateTemplate(supabase, template.id, pool, ctx);
-    if (viable) {
-      return persistAssignment(supabase, userId, template.id, overrides, { source: "algorithm" });
+    if (!viable) continue;
+    if (opts.avoidTemplateId && template.id === opts.avoidTemplateId) {
+      currentViable ??= { templateId: template.id, overrides };
+      continue;
     }
+    return persistAssignment(supabase, userId, template.id, overrides, { source: "algorithm" });
+  }
+  if (currentViable) {
+    return persistAssignment(supabase, userId, currentViable.templateId, currentViable.overrides, {
+      source: "algorithm",
+    });
   }
   return err("Nenhuma ficha viável para o seu perfil.");
 }

@@ -60,7 +60,7 @@ export function GenerateWorkoutButton({
   return (
     <ConfirmDialog
       title="Gerar uma nova ficha?"
-      description="Isto substitui a sua ficha atual e as personalizações (exercícios trocados ou adicionados). Se você estiver em um programa, o progresso de fase também é reiniciado."
+      description="Monta uma nova ficha para o seu perfil — quando há mais de uma opção compatível, traz uma variação diferente da atual. Isto substitui a ficha atual e as personalizações (exercícios trocados ou adicionados); se você estiver em um programa, o progresso de fase é reiniciado."
       confirmLabel="Gerar nova ficha"
       destructive={false}
       onConfirm={run}
