@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { CalendarDays, Clock } from "lucide-react";
+import { CalendarDays, ChevronRight, Clock } from "lucide-react";
 import { createClient } from "@/infrastructure/supabase/server";
 import { EmptyState } from "@/components/shared/empty-state";
 import { HistoryCalendar, WeeklyVolume } from "@/components/history/history-charts";
@@ -128,12 +129,13 @@ export default async function HistoryPage() {
       <section>
         <p className="mb-3 text-sm font-semibold">Treinos recentes</p>
         <div className="space-y-2">
-          {sessions.slice(0, 12).map((s) => {
+          {sessions.slice(0, 20).map((s) => {
             const d = new Date(s.completed_at);
             return (
-              <div
+              <Link
                 key={s.id}
-                className="bg-card flex items-center gap-3 rounded-2xl border p-4"
+                href={`${ROUTES.history}/${s.id}`}
+                className="bg-card hover:border-foreground/20 flex items-center gap-3 rounded-2xl border p-4 transition-colors"
               >
                 <div className="bg-primary/10 text-primary flex size-11 shrink-0 flex-col items-center justify-center rounded-xl leading-none">
                   <span className="text-base font-bold tabular-nums">{d.getDate()}</span>
@@ -148,7 +150,8 @@ export default async function HistoryPage() {
                     {formatDuration(s.duration_seconds)} · {formatVolume(s.total_volume)}
                   </p>
                 </div>
-              </div>
+                <ChevronRight className="text-muted-foreground size-4 shrink-0" />
+              </Link>
             );
           })}
         </div>
