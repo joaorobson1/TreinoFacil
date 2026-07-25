@@ -1,4 +1,5 @@
 import { BottomNav } from "./bottom-nav";
+import { ServiceWorkerRegister } from "./service-worker-register";
 
 /**
  * Casca da área autenticada: coluna centralizada mobile-first + navegação inferior.
@@ -9,6 +10,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col">
       <main className="flex-1 pb-24">{children}</main>
       <BottomNav />
+      <ServiceWorkerRegister />
     </div>
   );
 }

@@ -12,7 +12,9 @@ const compat = new FlatCompat({
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
-    ignores: [".next/**", "out/**", "build/**", "next-env.d.ts"],
+    // supabase/functions é código Deno (npm: specifiers, globais do Deno) —
+    // fora do lint do app Next.
+    ignores: [".next/**", "out/**", "build/**", "next-env.d.ts", "supabase/functions/**"],
   },
 ];
 

@@ -7,6 +7,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { SignOutButton } from "@/components/shared/sign-out-button";
 import { AccountActions } from "@/components/profile/account-actions";
+import { ReminderToggle } from "@/components/profile/reminder-toggle";
 import { cn } from "@/lib/utils";
 import {
   EXPERIENCE_OPTIONS,
@@ -35,7 +36,11 @@ export default async function ProfilePage() {
   if (!user) redirect(ROUTES.login);
 
   const [{ data: account }, { data: profile }] = await Promise.all([
-    supabase.from("users").select("name, email, whatsapp").eq("id", user.id).single(),
+    supabase
+      .from("users")
+      .select("name, email, whatsapp, reminders_enabled, reminder_hour")
+      .eq("id", user.id)
+      .single(),
     supabase
       .from("profiles")
       .select(
@@ -128,6 +133,16 @@ export default async function ProfilePage() {
             LOCATION_OPTIONS.find((o) => o.value === profile?.training_location)
               ?.label ?? dash
           }
+        />
+      </section>
+
+      <section className="mb-4">
+        <p className="text-muted-foreground mb-2 px-1 text-xs font-medium tracking-wide uppercase">
+          Lembretes
+        </p>
+        <ReminderToggle
+          enabled={account?.reminders_enabled ?? false}
+          hour={account?.reminder_hour ?? null}
         />
       </section>
 

@@ -6,6 +6,9 @@
 export const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 export const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
+/** Chave pública VAPID (Web Push). Vazia enquanto os lembretes não são configurados. */
+export const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "";
+
 /**
  * `true` somente quando há credenciais reais. Usado para desligar as chamadas de
  * auth enquanto o projeto Supabase não está conectado (placeholders em `.env.local`),
