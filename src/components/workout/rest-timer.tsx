@@ -86,7 +86,7 @@ export function RestTimer({
             transition={{ type: "spring", stiffness: 260, damping: 30 }}
           >
             <div className="bg-muted mx-auto mb-6 h-1.5 w-10 rounded-full" />
-            <p className="text-muted-foreground text-center text-sm font-medium">
+            <p aria-live="polite" className="text-muted-foreground text-center text-sm font-medium">
               {done ? "Descanso concluído" : "Descanso"}
             </p>
 

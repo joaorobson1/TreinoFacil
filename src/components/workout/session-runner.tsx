@@ -64,14 +64,17 @@ export function SessionRunner({
     return () => window.removeEventListener("beforeunload", warn);
   }, [phase]);
 
+  // O "check" da série é a fonte da verdade: só contam as séries marcadas como
+  // concluídas (evita contar as séries pré-preenchidas que o usuário não fez).
   const summary = useMemo(() => {
     let volume = 0;
     let doneSets = 0;
     for (const exSets of sets) {
       for (const s of exSets) {
+        if (!s.done) continue;
+        doneSets++;
         const w = toNum(s.weight);
         const r = toNum(s.reps);
-        if (r != null || w != null) doneSets++;
         if (w != null && r != null) volume += w * r;
       }
     }
@@ -124,7 +127,10 @@ export function SessionRunner({
       entries: exercises.map((e, exIdx) => ({
         exerciseId: e.exerciseId,
         workoutExerciseId: e.workoutExerciseId,
-        sets: sets[exIdx].map((s) => ({ weight: toNum(s.weight), reps: toNum(s.reps) })),
+        // apenas as séries efetivamente marcadas como concluídas
+        sets: sets[exIdx]
+          .filter((s) => s.done)
+          .map((s) => ({ weight: toNum(s.weight), reps: toNum(s.reps) })),
       })),
     });
     if (!result.ok) {
