@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Dumbbell } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -24,7 +24,10 @@ const item = {
   },
 } as const;
 
+const STEPS = ["Conte seu objetivo", "Receba sua ficha", "Treine e evolua"];
+
 export default function LandingPage() {
+  const reduce = useReducedMotion();
   return (
     <div className="relative flex min-h-dvh flex-col overflow-x-hidden">
       {/* Glow do accent ao fundo */}
@@ -40,7 +43,7 @@ export default function LandingPage() {
 
       <motion.main
         variants={container}
-        initial="hidden"
+        initial={reduce ? false : "hidden"}
         animate="show"
         className="relative z-10 mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 pb-10"
       >
@@ -102,6 +105,17 @@ export default function LandingPage() {
           >
             Já tenho conta
           </Link>
+        </motion.div>
+
+        <motion.div variants={item} className="mt-10 grid grid-cols-3 gap-2 text-center">
+          {STEPS.map((s, i) => (
+            <div key={s}>
+              <div className="bg-primary/10 text-primary mx-auto flex size-8 items-center justify-center rounded-full text-sm font-bold">
+                {i + 1}
+              </div>
+              <p className="text-muted-foreground mt-1.5 text-xs leading-tight text-balance">{s}</p>
+            </div>
+          ))}
         </motion.div>
 
         <motion.p

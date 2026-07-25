@@ -80,6 +80,12 @@ export default async function AchievementsPage() {
 
   const unlockedCount = views.filter((v) => v.unlocked).length;
 
+  // A conquistar: ordenadas pela proximidade do desbloqueio ("quase lá" no topo).
+  const ratio = (v: AchievementView) =>
+    v.progress && v.progress.target > 0 ? v.progress.current / v.progress.target : 0;
+  const toUnlock = views.filter((v) => !v.unlocked).sort((a, b) => ratio(b) - ratio(a));
+  const unlockedViews = views.filter((v) => v.unlocked);
+
   return (
     <div className="mx-auto w-full max-w-md px-6 pt-8">
       <div className="mb-6">
@@ -88,11 +94,28 @@ export default async function AchievementsPage() {
           {unlockedCount} de {views.length} desbloqueadas
         </p>
       </div>
-      <div className="space-y-2.5">
-        {views.map((a) => (
-          <AchievementBadge key={a.slug} a={a} />
-        ))}
-      </div>
+
+      {toUnlock.length > 0 && (
+        <section className="mb-6">
+          <p className="text-muted-foreground mb-2.5 text-sm font-semibold">A conquistar</p>
+          <div className="space-y-2.5">
+            {toUnlock.map((a) => (
+              <AchievementBadge key={a.slug} a={a} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {unlockedViews.length > 0 && (
+        <section>
+          <p className="text-muted-foreground mb-2.5 text-sm font-semibold">Conquistadas</p>
+          <div className="space-y-2.5">
+            {unlockedViews.map((a) => (
+              <AchievementBadge key={a.slug} a={a} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
