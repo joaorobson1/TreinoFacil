@@ -12,7 +12,8 @@ export default async function AdminExercisesPage() {
   const supabase = await createClient();
   const { data } = await supabase
     .from("exercises")
-    .select("id, name, level, is_active, muscle_groups(name)")
+    // desambigua o embed (2 relações exercises↔muscle_groups)
+    .select("id, name, level, is_active, muscle_groups!primary_muscle_group_id(name)")
     .order("name");
 
   const exercises = (data ?? []).map((e) => ({

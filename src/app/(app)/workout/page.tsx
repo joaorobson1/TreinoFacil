@@ -64,7 +64,9 @@ export default async function WorkoutPage() {
         .order("created_at"),
       supabase
         .from("exercises")
-        .select("id, name, muscle_groups(name)")
+        // desambigua o embed: exercises tem 2 relações com muscle_groups
+        // (FK direta primary_muscle_group_id + junção exercise_muscle_groups)
+        .select("id, name, muscle_groups!primary_muscle_group_id(name)")
         .eq("is_active", true)
         .order("name"),
     ]);
