@@ -382,6 +382,7 @@ const SPLITS = {
   upper_lower_4: {
     days: 4,
     label: "4 dias",
+    splitName: "Upper/Lower 4 dias",
     split: "upper_lower",
     blocks: [
       { name: "Superiores A", focus: "Peito, Costas, Ombros, Braços",
@@ -397,6 +398,7 @@ const SPLITS = {
   bro_5: {
     days: 5,
     label: "5 dias",
+    splitName: "Bro Split 5 dias",
     split: "bro",
     blocks: [
       { name: "Peito e Tríceps", focus: "Empurrar",
@@ -414,6 +416,7 @@ const SPLITS = {
   ppl_6: {
     days: 6,
     label: "6 dias",
+    splitName: "PPL 6 dias",
     split: "ppl",
     blocks: [
       { name: "Empurrar A", focus: "Peito, Ombros, Tríceps",
@@ -428,6 +431,74 @@ const SPLITS = {
         slugs: ["remada_curvada_barra", "puxada_polia", "remada_halteres", "rosca_direta_barra", "rosca_polia"] },
       { name: "Pernas B", focus: "Pernas e Abdômen",
         slugs: ["agachamento_livre", "afundo_halteres", "stiff_halteres", "panturrilha_pe", "abdominal_supra"] },
+    ],
+  },
+  full_body_3g: {
+    days: 3,
+    label: "3 dias",
+    splitName: "Full Body 3 dias",
+    split: "full_body",
+    blocks: [
+      { name: "Corpo inteiro A", focus: "Corpo inteiro",
+        slugs: ["leg_press_45", "supino_maquina", "remada_maquina", "desenvolvimento_halteres", "prancha"] },
+      { name: "Corpo inteiro B", focus: "Corpo inteiro",
+        slugs: ["agachamento_livre", "supino_reto_halteres", "puxada_polia", "elevacao_lateral", "abdominal_supra"] },
+      { name: "Corpo inteiro C", focus: "Corpo inteiro",
+        slugs: ["afundo_halteres", "crucifixo_crossover", "remada_halteres", "rosca_alternada_halteres", "triceps_polia"] },
+    ],
+  },
+  ppl_3: {
+    days: 3,
+    label: "3 dias",
+    splitName: "PPL 3 dias",
+    split: "ppl",
+    blocks: [
+      { name: "Empurrar", focus: "Peito, Ombros, Tríceps",
+        slugs: ["supino_reto_halteres", "supino_maquina", "desenvolvimento_halteres", "elevacao_lateral", "triceps_polia"] },
+      { name: "Puxar", focus: "Costas, Bíceps",
+        slugs: ["puxada_polia", "remada_maquina", "remada_halteres", "rosca_direta_barra", "rosca_polia"] },
+      { name: "Pernas", focus: "Pernas, Glúteos",
+        slugs: ["leg_press_45", "cadeira_extensora_ex", "mesa_flexora_ex", "ponte_gluteo", "panturrilha_halteres"] },
+    ],
+  },
+  upper_lower_6: {
+    days: 6,
+    label: "6 dias",
+    splitName: "Upper/Lower 6 dias",
+    split: "upper_lower",
+    blocks: [
+      { name: "Superiores A", focus: "Peito, Costas, Ombros, Braços",
+        slugs: ["supino_reto_halteres", "remada_maquina", "desenvolvimento_halteres", "rosca_alternada_halteres", "triceps_polia"] },
+      { name: "Inferiores A", focus: "Pernas",
+        slugs: ["leg_press_45", "mesa_flexora_ex", "cadeira_extensora_ex", "panturrilha_halteres", "prancha"] },
+      { name: "Superiores B", focus: "Peito, Costas, Ombros, Braços",
+        slugs: ["supino_maquina", "puxada_polia", "elevacao_lateral", "rosca_direta_barra", "triceps_frances_halter"] },
+      { name: "Inferiores B", focus: "Pernas, Glúteos",
+        slugs: ["agachamento_livre", "stiff_halteres", "afundo_halteres", "ponte_gluteo", "abdominal_supra"] },
+      { name: "Superiores C", focus: "Peito, Costas, Ombros, Braços",
+        slugs: ["supino_reto_barra", "remada_curvada_barra", "desenvolvimento_militar_barra", "rosca_polia", "mergulho_banco"] },
+      { name: "Inferiores C", focus: "Pernas, Abdômen",
+        slugs: ["agachamento_livre", "cadeira_extensora_ex", "mesa_flexora_ex", "panturrilha_pe", "elevacao_pernas"] },
+    ],
+  },
+  arnold_6: {
+    days: 6,
+    label: "6 dias",
+    splitName: "Arnold 6 dias",
+    split: "arnold",
+    blocks: [
+      { name: "Peito e Costas A", focus: "Peito, Costas",
+        slugs: ["supino_reto_barra", "remada_curvada_barra", "supino_maquina", "puxada_polia", "crucifixo_crossover"] },
+      { name: "Ombros e Braços A", focus: "Ombros, Bíceps, Tríceps",
+        slugs: ["desenvolvimento_halteres", "elevacao_lateral", "rosca_direta_barra", "triceps_polia", "rosca_polia"] },
+      { name: "Pernas A", focus: "Pernas, Glúteos",
+        slugs: ["agachamento_livre", "leg_press_45", "mesa_flexora_ex", "cadeira_extensora_ex", "panturrilha_halteres"] },
+      { name: "Peito e Costas B", focus: "Peito, Costas",
+        slugs: ["supino_reto_halteres", "remada_maquina", "crucifixo_crossover", "remada_halteres", "supino_maquina"] },
+      { name: "Ombros e Braços B", focus: "Ombros, Bíceps, Tríceps",
+        slugs: ["desenvolvimento_militar_barra", "elevacao_lateral", "rosca_alternada_halteres", "triceps_frances_halter", "mergulho_banco"] },
+      { name: "Pernas B", focus: "Pernas, Abdômen",
+        slugs: ["afundo_halteres", "stiff_halteres", "cadeira_extensora_ex", "ponte_gluteo", "panturrilha_pe"] },
     ],
   },
 };
@@ -454,13 +525,19 @@ function repsFor(slug, scheme) {
   return scheme.reps;
 }
 
-/** Força e hipertrofia usam menos séries em músculos pequenos (evita volume exagerado). */
-function setsFor(slug, scheme) {
-  if (scheme.sets >= 4 && SMALL_MUSCLES.has(MUSCLE_BY_SLUG[slug])) return 3;
-  return scheme.sets;
+/**
+ * Força/hipertrofia usam menos séries em músculos pequenos (evita volume
+ * exagerado). Avançado ganha +1 série nos grandes (teto 5).
+ */
+function setsFor(slug, scheme, level = "beginner") {
+  let sets = scheme.sets;
+  const isSmall = SMALL_MUSCLES.has(MUSCLE_BY_SLUG[slug]);
+  if (level === "advanced" && !isSmall) sets = Math.min(sets + 1, 5);
+  if (sets >= 4 && isSmall) return 3;
+  return sets;
 }
 
-// quais (objetivo × split) gerar
+// COMBOS ORIGINAIS (iniciante) — mantidos com o nome antigo para não recriar.
 const COMBOS = [
   ...["emagrecer", "hipertrofia", "definicao", "condicionamento", "ganho_forca", "saude"].flatMap(
     (goal) => [
@@ -471,30 +548,55 @@ const COMBOS = [
   { goal: "hipertrofia", splitKey: "ppl_6" },
 ];
 
-/** Constrói as fichas geradas (nomes usam o display name do objetivo). */
+// Fichas por NÍVEL — preenchem a lacuna de intermediário/avançado e adicionam
+// mais variedade de splits. Nome inclui o split para não colidir entre si.
+const PHYSIQUE_GOALS = ["emagrecer", "hipertrofia", "definicao", "condicionamento", "ganho_forca", "saude"];
+const LEVEL_PLAN = [
+  { level: "beginner", label: "Iniciante", session: 45, priority: 12, splits: ["full_body_3g"] },
+  { level: "intermediate", label: "Intermediário", session: 60, priority: 14, splits: ["full_body_3g", "upper_lower_4", "ppl_3", "bro_5"] },
+  { level: "advanced", label: "Avançado", session: 90, priority: 16, splits: ["ppl_6", "arnold_6", "upper_lower_6"] },
+];
+const LEVELED_COMBOS = LEVEL_PLAN.flatMap((plan) =>
+  PHYSIQUE_GOALS.flatMap((goal) => plan.splits.map((splitKey) => ({ goal, splitKey, plan }))),
+);
+
+function buildDays(s, scheme, level) {
+  const restBonus = level === "advanced" ? 15 : 0;
+  return s.blocks.map((b) => ({
+    name: b.name,
+    focus: b.focus,
+    exercises: b.slugs.map((slug) => ({
+      slug,
+      sets: setsFor(slug, scheme, level),
+      reps: repsFor(slug, scheme),
+      rest: scheme.rest + restBonus,
+    })),
+  }));
+}
+
+/** Constrói as fichas geradas (originais iniciante + variações por nível). */
 export function buildGeneratedTemplates(goalNameBySlug) {
-  return COMBOS.map(({ goal, splitKey }) => {
+  const original = COMBOS.map(({ goal, splitKey }) => {
     const s = SPLITS[splitKey];
     const scheme = GOAL_SCHEME[goal];
     return {
       name: `${goalNameBySlug[goal]} • Iniciante • ${s.label} (academia)`,
-      goal,
-      experience: "beginner",
-      days_per_week: s.days,
-      session: 60,
-      min_location: "small_gym",
-      split: s.split,
-      priority: 12,
-      days: s.blocks.map((b) => ({
-        name: b.name,
-        focus: b.focus,
-        exercises: b.slugs.map((slug) => ({
-          slug,
-          sets: setsFor(slug, scheme),
-          reps: repsFor(slug, scheme),
-          rest: scheme.rest,
-        })),
-      })),
+      goal, experience: "beginner", days_per_week: s.days, session: 60,
+      min_location: "small_gym", split: s.split, priority: 12,
+      days: buildDays(s, scheme, "beginner"),
     };
   });
+
+  const leveled = LEVELED_COMBOS.map(({ goal, splitKey, plan }) => {
+    const s = SPLITS[splitKey];
+    const scheme = GOAL_SCHEME[goal];
+    return {
+      name: `${goalNameBySlug[goal]} • ${plan.label} • ${s.splitName} (academia)`,
+      goal, experience: plan.level, days_per_week: s.days, session: plan.session,
+      min_location: "small_gym", split: s.split, priority: plan.priority,
+      days: buildDays(s, scheme, plan.level),
+    };
+  });
+
+  return [...original, ...leveled];
 }
