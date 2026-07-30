@@ -1,4 +1,4 @@
-# TreinoFácil — FASE 1 · Arquitetura, Estrutura de Pastas e Design System
+# Movra — FASE 1 · Arquitetura, Estrutura de Pastas e Design System
 
 > Documento de arquitetura. **Nenhuma dependência é instalada nesta fase.** Este arquivo é o contrato técnico que guia as FASES 2–7.
 
@@ -6,7 +6,7 @@
 
 ## 1. Princípios da arquitetura
 
-O TreinoFácil é um **PWA comercial** (Play Store / App Store via wrapper PWA), então a arquitetura precisa ser:
+O Movra é um **PWA comercial** (Play Store / App Store via wrapper PWA), então a arquitetura precisa ser:
 
 - **Testável e independente de framework** no núcleo de regras de negócio (o algoritmo de seleção de ficha não pode depender do Next nem do Supabase).
 - **Barata de manter** — zero IA, toda personalização é regra + banco.
@@ -61,7 +61,7 @@ Route Handlers (`app/api/*`) ficam reservados para o que precisa de HTTP puro: w
 ## 3. Estrutura de pastas
 
 ```
-TreinoFácil/
+Movra/
 ├─ public/
 │  ├─ icons/                      # ícones PWA (192, 512, maskable, apple-touch)
 │  ├─ splash/                     # splash screens iOS

@@ -40,7 +40,7 @@ comentário em `supabase/migrations/0005_push_reminders.sql`):
 
 ```sql
 select cron.schedule(
-  'treinofacil-reminders', '0 * * * *', $cron$
+  'movra-reminders', '0 * * * *', $cron$
   select net.http_post(
     url := 'https://SEU-REF.functions.supabase.co/send-reminders',
     headers := jsonb_build_object(

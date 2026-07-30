@@ -1,4 +1,4 @@
-# TreinoFácil
+# Movra
 
 App **PWA** que entrega fichas de treino **personalizadas** para iniciantes na academia — montadas por **regras e banco de dados**, sem nenhuma IA. O usuário responde um onboarding (objetivo, experiência, dias, tempo, equipamentos, limitações) e o sistema seleciona e adapta automaticamente a ficha ideal.
 

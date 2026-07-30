@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { LEGAL } from "@/lib/legal";
 
 export const metadata: Metadata = {
   title: "Política de Privacidade",
   description:
-    "Como o TreinoFácil coleta, usa e protege seus dados pessoais e de saúde.",
+    "Como o Movra coleta, usa e protege seus dados pessoais e de saúde.",
 };
 
 function H({ children }: { children: React.ReactNode }) {
@@ -20,7 +21,7 @@ export default function PrivacidadePage() {
       </p>
 
       <p>
-        Esta política explica como o <strong>TreinoFácil</strong> trata seus dados
+        Esta política explica como o <strong>Movra</strong> trata seus dados
         pessoais, em conformidade com a Lei Geral de Proteção de Dados (Lei
         13.709/2018 — LGPD).
       </p>
@@ -106,12 +107,16 @@ export default function PrivacidadePage() {
         solicitar anonimização, bloqueio ou eliminação; solicitar portabilidade;
         e revogar o consentimento. Para isso, escreva para{" "}
         <strong>{LEGAL.contactEmail}</strong>. Você também pode editar seu perfil
-        e excluir sua conta pelo próprio app.
+        e excluir sua conta pelo próprio app ou pela página de{" "}
+        <Link href="/excluir-conta" className="text-primary underline">
+          exclusão de conta e dados
+        </Link>
+        .
       </p>
 
       <H>8. Idade mínima</H>
       <p>
-        O TreinoFácil é destinado a pessoas com <strong>16 anos ou mais</strong>.
+        O Movra é destinado a pessoas com <strong>16 anos ou mais</strong>.
         Não coletamos intencionalmente dados de crianças. Se identificarmos um
         cadastro abaixo dessa idade, a conta será removida.
       </p>

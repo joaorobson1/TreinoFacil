@@ -48,10 +48,11 @@ export default function LandingPage() {
         className="relative z-10 mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 pb-10"
       >
         <motion.div variants={item} className="mb-8 flex justify-center">
-          <div className="ring-primary/10 rounded-[2rem] bg-white p-4 shadow-xl shadow-black/10 ring-1">
+          {/* Tile escuro nos dois temas: a marca foi desenhada sobre preto. */}
+          <div className="ring-primary/20 rounded-[2rem] bg-[#010308] p-4 shadow-xl shadow-black/20 ring-1">
             <Image
-              src="/logotreinofacil.png"
-              alt="TreinoFácil — Treine melhor. Evolua sempre."
+              src="/movra.png"
+              alt="Movra — Treine melhor. Evolua sempre."
               width={512}
               height={512}
               priority

@@ -1,27 +1,30 @@
 /**
- * Gera favicon + ícones PWA + a logo da home a partir de logotreinofacil.png.
- * - Ícones (favicon/apple/manifest): recorta só o monograma "TF" e centraliza
- *   num quadrado branco (o lockup completo fica ilegível em tamanhos pequenos).
- * - Home: logo completa aparada e centralizada num quadrado branco.
+ * Gera favicon + ícones PWA + a logo da home a partir de movra.png.
+ * - Ícones (favicon/apple/manifest): recorta só o monograma "M" e centraliza
+ *   num quadrado preto (o lockup completo fica ilegível em tamanhos pequenos).
+ * - Home: logo completa aparada e centralizada num quadrado preto.
+ * A marca foi desenhada sobre fundo preto, então tudo é composto sobre BRAND_BLACK
+ * — o mesmo valor usado em background_color no manifest, para a splash não piscar.
  * Uso: `node scripts/gen-icons.mjs`
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import sharp from "sharp";
 
-const SRC = "logotreinofacil.png";
-const WHITE = { r: 255, g: 255, b: 255, alpha: 1 };
+const SRC = "movra.png";
+/** Preto do arquivo da marca (rgb 1,3,8) — mantém o recorte sem emenda visível. */
+const BRAND_BLACK = { r: 1, g: 3, b: 8, alpha: 1 };
 
-// Região do monograma (frame + TF), sem a wordmark/slogan abaixo.
-// Content bbox medido via trim: offset (163,202), 955x817.
-const MONO = { left: 163, top: 202, width: 955, height: 600 };
+// Região do monograma (M + braço + speed lines), sem a wordmark/tagline abaixo.
+// Content bbox medido por varredura de luminância: x 242-964, y 362-725.
+const MONO = { left: 242, top: 362, width: 723, height: 364 };
 
-/** Apara o branco e devolve um buffer PNG quadrado (conteúdo centralizado + margem). */
-async function squareOnWhite(input, { pad = 0.1 } = {}) {
-  const trimmed = await sharp(input).trim({ threshold: 10 }).png().toBuffer();
+/** Apara o fundo e devolve um buffer PNG quadrado (conteúdo centralizado + margem). */
+async function squareOnBlack(input, { pad = 0.1 } = {}) {
+  const trimmed = await sharp(input).trim({ threshold: 12 }).png().toBuffer();
   const { width, height } = await sharp(trimmed).metadata();
   const side = Math.round(Math.max(width, height) * (1 + pad * 2));
   return sharp({
-    create: { width: side, height: side, channels: 4, background: WHITE },
+    create: { width: side, height: side, channels: 4, background: BRAND_BLACK },
   })
     .composite([{ input: trimmed, gravity: "center" }])
     .png()
@@ -47,10 +50,11 @@ function pngToIco(pngBuf, size) {
 }
 
 async function main() {
-  const monogram = await squareOnWhite(
-    await sharp(readFileSync(SRC)).extract(MONO).png().toBuffer(),
-    { pad: 0.12 },
-  );
+  const mono = () => sharp(readFileSync(SRC)).extract(MONO).png().toBuffer();
+
+  // O monograma é largo (~2:1); margem menor que a da marca antiga para o "M"
+  // não encolher demais dentro do quadrado.
+  const monogram = await squareOnBlack(await mono(), { pad: 0.08 });
 
   // favicon (Next: src/app/icon.png) + favicon.ico legado
   await sharp(monogram).resize(512, 512).png().toFile("src/app/icon.png");
@@ -58,21 +62,25 @@ async function main() {
   writeFileSync("src/app/favicon.ico", pngToIco(ico32, 48));
 
   // Apple touch icon — iOS arredonda; um pouco mais de respiro
-  const appleBg = await squareOnWhite(
-    await sharp(readFileSync(SRC)).extract(MONO).png().toBuffer(),
-    { pad: 0.18 },
-  );
+  const appleBg = await squareOnBlack(await mono(), { pad: 0.14 });
   await sharp(appleBg).resize(180, 180).png().toFile("src/app/apple-icon.png");
 
   // Ícones do manifest (PWA)
   await sharp(monogram).resize(192, 192).png().toFile("public/icon-192.png");
   await sharp(monogram).resize(512, 512).png().toFile("public/icon-512.png");
 
-  // Logo completa para a home
-  const fullLogo = await squareOnWhite(readFileSync(SRC), { pad: 0.06 });
-  await sharp(fullLogo).resize(512, 512).png().toFile("public/logotreinofacil.png");
+  // Ícones maskable (Android/TWA): o launcher recorta em círculo/squircle, então
+  // o conteúdo precisa caber na "safe zone" central (~80%). Margem maior garante
+  // que o monograma nunca seja cortado; o fundo preto preenche os cantos.
+  const maskable = await squareOnBlack(await mono(), { pad: 0.32 });
+  await sharp(maskable).resize(192, 192).png().toFile("public/icon-192-maskable.png");
+  await sharp(maskable).resize(512, 512).png().toFile("public/icon-512-maskable.png");
 
-  console.log("✓ ícones gerados: icon.png, apple-icon.png, favicon.ico, icon-192/512, logotreinofacil.png");
+  // Logo completa (monograma + wordmark + tagline) para a home
+  const fullLogo = await squareOnBlack(readFileSync(SRC), { pad: 0.06 });
+  await sharp(fullLogo).resize(512, 512).png().toFile("public/movra.png");
+
+  console.log("✓ ícones gerados: icon.png, apple-icon.png, favicon.ico, icon-192/512, icon-192/512-maskable, movra.png");
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });

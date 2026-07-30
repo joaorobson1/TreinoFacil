@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const APP_NAME = "TreinoFácil";
+const APP_NAME = "Movra";
 const APP_DESCRIPTION =
   "Seu treino personalizado, sem complicação. Fichas montadas para o seu objetivo, nível e equipamentos.";
 

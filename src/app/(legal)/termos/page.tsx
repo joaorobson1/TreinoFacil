@@ -4,7 +4,7 @@ import { LEGAL } from "@/lib/legal";
 export const metadata: Metadata = {
   title: "Termos de Uso",
   description:
-    "Condições de uso do TreinoFácil, incluindo o aviso de saúde e limitações de responsabilidade.",
+    "Condições de uso do Movra, incluindo o aviso de saúde e limitações de responsabilidade.",
 };
 
 function H({ children }: { children: React.ReactNode }) {
@@ -22,7 +22,7 @@ export default function TermosPage() {
       <div className="border-destructive/40 bg-destructive/10 mt-4 rounded-2xl border p-4">
         <p className="font-semibold">Aviso de saúde — leia antes de treinar</p>
         <p className="mt-2">
-          O TreinoFácil é um app de <strong>organização de treinos</strong>. Ele{" "}
+          O Movra é um app de <strong>organização de treinos</strong>. Ele{" "}
           <strong>não é um serviço médico</strong> e não substitui a avaliação de
           um médico, fisioterapeuta ou profissional de educação física. As fichas
           são geradas automaticamente por regras, a partir do que você informa —
@@ -46,7 +46,7 @@ export default function TermosPage() {
 
       <H>2. O que o app faz</H>
       <p>
-        O TreinoFácil monta uma ficha de treino por meio de regras
+        O Movra monta uma ficha de treino por meio de regras
         pré-programadas, considerando seu objetivo, nível de experiência, tempo
         disponível, equipamentos e limitações declaradas. Também registra seus
         treinos e acompanha sua evolução.

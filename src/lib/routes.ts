@@ -19,6 +19,7 @@ export const ROUTES = {
   admin: "/admin",
   privacy: "/privacidade",
   terms: "/termos",
+  deleteAccount: "/excluir-conta",
 } as const;
 
 /** Rotas que exigem sessão autenticada. */

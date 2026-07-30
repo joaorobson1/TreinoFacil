@@ -273,7 +273,7 @@ export function OnboardingWizard({
                 </div>
                 {age !== "" && num(age) < MIN_AGE && (
                   <p className="text-destructive text-sm">
-                    É necessário ter pelo menos {MIN_AGE} anos para usar o TreinoFácil.
+                    É necessário ter pelo menos {MIN_AGE} anos para usar o Movra.
                   </p>
                 )}
               </div>

@@ -34,8 +34,11 @@ create index if not exists idx_push_subs_user on public.push_subscriptions(user_
 -- Requer as extensões pg_cron e pg_net habilitadas no projeto. Roda de hora em
 -- hora; a própria função decide quem deve receber (horário local + já treinou).
 --
+-- Se o job já foi criado com o nome antigo, remova antes:
+--   select cron.unschedule('treinofacil-reminders');
+--
 --   select cron.schedule(
---     'treinofacil-reminders', '0 * * * *', $cron$
+--     'movra-reminders', '0 * * * *', $cron$
 --     select net.http_post(
 --       url := 'https://SEU-REF.functions.supabase.co/send-reminders',
 --       headers := jsonb_build_object(

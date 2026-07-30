@@ -1,5 +1,5 @@
 -- ============================================================================
--- TreinoFácil — Migration inicial (schema v2)
+-- Movra — Migration inicial (schema v2)
 -- Gerado a partir de docs/02-BANCO-DE-DADOS.md
 -- Ordem: extensões → enums → tabelas → índices → funções → RLS → triggers
 -- ============================================================================

@@ -27,7 +27,7 @@ const partsInTz = (d: Date) => {
 Deno.serve(async () => {
   const supabase = createClient(env("SUPABASE_URL"), env("SUPABASE_SERVICE_ROLE_KEY"));
   webpush.setVapidDetails(
-    env("VAPID_SUBJECT") || "mailto:admin@treinofacil.app",
+    env("VAPID_SUBJECT") || "mailto:admin@movra.app",
     env("VAPID_PUBLIC_KEY"),
     env("VAPID_PRIVATE_KEY"),
   );

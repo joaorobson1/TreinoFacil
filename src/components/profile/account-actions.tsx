@@ -27,7 +27,7 @@ export function AccountActions() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "treinofacil-meus-dados.json";
+    a.download = "movra-meus-dados.json";
     a.click();
     URL.revokeObjectURL(url);
     toast.success("Seus dados foram exportados.");

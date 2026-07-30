@@ -1,5 +1,5 @@
 -- ============================================================================
--- TreinoFácil — Migration 0002: exercícios adicionados pelo usuário à ficha
+-- Movra — Migration 0002: exercícios adicionados pelo usuário à ficha
 -- Permite ao usuário incluir exercícios extras em um dia da sua ficha ativa,
 -- além dos que vêm do template (que já podem ser substituídos/removidos por
 -- user_workout_overrides).

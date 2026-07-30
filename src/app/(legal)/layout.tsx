@@ -28,8 +28,9 @@ export default function LegalLayout({
           <div className="mb-6 flex gap-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4">
             <TriangleAlert className="mt-0.5 size-5 shrink-0 text-amber-500" />
             <p className="text-sm">
-              <strong>Documento incompleto.</strong> Preencha os dados do
-              responsável em <code>src/lib/legal.ts</code> antes de publicar o app.
+              <strong>Documento incompleto.</strong> Configure os dados do
+              responsável (variáveis <code>NEXT_PUBLIC_LEGAL_*</code>) antes de
+              publicar o app.
             </p>
           </div>
         )}

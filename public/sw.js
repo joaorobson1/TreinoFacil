@@ -1,4 +1,4 @@
-/* Service worker do TreinoFácil — recebe Web Push e abre o app ao tocar. */
+/* Service worker do Movra — recebe Web Push e abre o app ao tocar. */
 
 self.addEventListener("push", (event) => {
   let payload = {};
@@ -7,7 +7,7 @@ self.addEventListener("push", (event) => {
   } catch {
     payload = {};
   }
-  const title = payload.title || "TreinoFácil";
+  const title = payload.title || "Movra";
   const options = {
     body: payload.body || "Hora de treinar! 💪",
     icon: "/icon-192.png",

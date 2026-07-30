@@ -1,15 +1,17 @@
 import { cn } from "@/lib/utils";
 
-/** Marca do TreinoFácil — wordmark com o "ponto" no accent da marca. */
+/** Marca do Movra — wordmark caixa-alta com o "A" final no accent da marca. */
 export function Logo({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "font-heading text-2xl font-bold tracking-tight lowercase",
+        // -mr compensa o espaço que o tracking adiciona depois da última letra,
+        // senão o wordmark fica visualmente descolado à direita.
+        "font-heading -mr-[0.18em] text-2xl font-bold tracking-[0.18em]",
         className,
       )}
     >
-      treino<span className="text-primary">fácil.</span>
+      MOVR<span className="text-primary">A</span>
     </span>
   );
 }

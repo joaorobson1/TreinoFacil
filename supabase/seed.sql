@@ -1,5 +1,5 @@
 -- ============================================================================
--- TreinoFácil — Seed de dados de referência (idempotente)
+-- Movra — Seed de dados de referência (idempotente)
 -- Popula tabelas lookup/data-driven. Exercícios, fichas e programas são
 -- cadastrados pelo painel admin (FASES 5–6).
 -- ============================================================================

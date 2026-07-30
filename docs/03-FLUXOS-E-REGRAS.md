@@ -1,4 +1,4 @@
-# TreinoFácil — FASE 1 · Fluxos, Casos de Uso e Regras de Negócio (v2)
+# Movra — FASE 1 · Fluxos, Casos de Uso e Regras de Negócio (v2)
 
 > **v2** substitui o `WorkoutMatcher` único pelo pipeline **Selector → Validator → Generator**, e adiciona progressão automática, gamificação, evolução física, dashboard completo e analytics de admin. **Zero IA — tudo é regra + banco.**
 
