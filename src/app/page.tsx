@@ -52,7 +52,7 @@ export default function LandingPage() {
           <div className="ring-primary/20 rounded-[2rem] bg-[#010308] p-4 shadow-xl shadow-black/20 ring-1">
             <Image
               src="/movra.png"
-              alt="Movra — Treine melhor. Evolua sempre."
+              alt="Movra"
               width={512}
               height={512}
               priority

@@ -45,19 +45,36 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
+  /**
+   * Redireciona PRESERVANDO os cookies que o `getUser()` acabou de renovar.
+   *
+   * O Supabase rotaciona o refresh token: ao renovar, o token antigo é
+   * invalidado e um novo é emitido no `supabaseResponse`. Um
+   * `NextResponse.redirect()` cru descarta essa resposta, então o browser
+   * continua com o token já queimado e a sessão morre no request seguinte —
+   * o usuário cai no login toda vez que reabre o app.
+   */
+  const redirectPreservingSession = (url: URL) => {
+    const response = NextResponse.redirect(url);
+    for (const cookie of supabaseResponse.cookies.getAll()) {
+      response.cookies.set(cookie);
+    }
+    return response;
+  };
+
   // Não autenticado tentando acessar área protegida → login.
   if (!user && matchesPrefix(pathname, PROTECTED_PREFIXES)) {
     const url = request.nextUrl.clone();
     url.pathname = ROUTES.login;
     url.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(url);
+    return redirectPreservingSession(url);
   }
 
   // Autenticado em página de auth → dashboard.
   if (user && matchesPrefix(pathname, AUTH_PREFIXES)) {
     const url = request.nextUrl.clone();
     url.pathname = ROUTES.dashboard;
-    return NextResponse.redirect(url);
+    return redirectPreservingSession(url);
   }
 
   return supabaseResponse;
